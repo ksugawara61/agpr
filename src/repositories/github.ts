@@ -70,6 +70,21 @@ type CreateReviewParams = {
   repo: string;
 };
 
+export type GitHubCreatedPullRequest = {
+  number: number;
+  url: string;
+};
+
+type CreateDraftPullRequestParams = {
+  baseBranch: string;
+  body: string;
+  cwd: string;
+  headBranch: string;
+  owner: string;
+  repo: string;
+  title: string;
+};
+
 export class GhNotInstalledError extends Error {
   code = "NO_GH" as const;
   constructor() {
@@ -316,6 +331,52 @@ export const addPullRequestReviewThreadReply = async (args: {
     { cwd: args.cwd },
   );
   return JSON.parse(stdout) as GitHubReviewThreadReply;
+};
+
+export const createDraftPullRequest = async (
+  params: CreateDraftPullRequestParams,
+): Promise<GitHubCreatedPullRequest> => {
+  const payload = {
+    base: params.baseBranch,
+    body: params.body,
+    draft: true,
+    head: params.headBranch,
+    title: params.title,
+  };
+  const { stdout } = await runGh(
+    [
+      "api",
+      "-X",
+      "POST",
+      `repos/${params.owner}/${params.repo}/pulls`,
+      "--input",
+      "-",
+      "--jq",
+      "{number, url: .html_url}",
+    ],
+    { cwd: params.cwd, input: JSON.stringify(payload) },
+  );
+  return JSON.parse(stdout) as GitHubCreatedPullRequest;
+};
+
+export const requestCopilotReview = async (args: {
+  cwd: string;
+  owner: string;
+  pullNumber: number;
+  repo: string;
+}): Promise<void> => {
+  await runGh(
+    [
+      "pr",
+      "edit",
+      String(args.pullNumber),
+      "--repo",
+      `${args.owner}/${args.repo}`,
+      "--add-reviewer",
+      "@copilot",
+    ],
+    { cwd: args.cwd },
+  );
 };
 
 type GitHubReview = {

@@ -7,6 +7,7 @@ vi.mock("execa", () => ({
 import { execa } from "execa";
 import {
   addPullRequestReviewThreadReply,
+  createDraftPullRequest,
   createReview,
   createReviewCommentSingle,
   ensureGhAuthenticated,
@@ -18,6 +19,7 @@ import {
   listReviewComments,
   listReviewThreads,
   parseRepoSlug,
+  requestCopilotReview,
   updateReview,
   updateReviewComment,
 } from "./github.js";
@@ -305,6 +307,64 @@ describe("addPullRequestReviewThreadReply", () => {
     expect(
       call[1]?.some((arg) => arg.includes("addPullRequestReviewThreadReply")),
     ).toBe(true);
+  });
+});
+
+describe("createDraftPullRequest", () => {
+  it("sends POST to pulls endpoint with draft payload", async () => {
+    stubOk(
+      JSON.stringify({ number: 42, url: "https://github.com/o/r/pull/42" }),
+    );
+
+    const result = await createDraftPullRequest({
+      baseBranch: "main",
+      body: "## Background\n\nwhy",
+      cwd: "/repo",
+      headBranch: "feature/create-draft-pr",
+      owner: "o",
+      repo: "r",
+      title: "Add draft PR command",
+    });
+
+    expect(result).toEqual({
+      number: 42,
+      url: "https://github.com/o/r/pull/42",
+    });
+    const call = mockExeca.mock.calls[0];
+    expect(call[1]).toContain("api");
+    expect(call[1]).toContain("POST");
+    expect(call[1]).toContain("repos/o/r/pulls");
+    expect(call[1]).toContain("{number, url: .html_url}");
+    const opts = call[2] as unknown as { input?: string };
+    expect(JSON.parse(opts.input ?? "{}")).toEqual({
+      base: "main",
+      body: "## Background\n\nwhy",
+      draft: true,
+      head: "feature/create-draft-pr",
+      title: "Add draft PR command",
+    });
+  });
+});
+
+describe("requestCopilotReview", () => {
+  it("adds @copilot as a pull request reviewer", async () => {
+    stubOk("");
+
+    await requestCopilotReview({
+      cwd: "/repo",
+      owner: "o",
+      pullNumber: 42,
+      repo: "r",
+    });
+
+    const call = mockExeca.mock.calls[0];
+    expect(call[1]).toContain("pr");
+    expect(call[1]).toContain("edit");
+    expect(call[1]).toContain("42");
+    expect(call[1]).toContain("--repo");
+    expect(call[1]).toContain("o/r");
+    expect(call[1]).toContain("--add-reviewer");
+    expect(call[1]).toContain("@copilot");
   });
 });
 
