@@ -9,6 +9,8 @@ type OutputFormat = "json" | "text";
 type ReviewCommandOptions = {
   branch: string;
   cwd: string;
+  excludeOutdated: boolean;
+  excludeResolved: boolean;
   format: OutputFormat;
   repo: string;
 };
@@ -100,6 +102,8 @@ export const registerReviewCommand = (program: Command): void => {
     .description("Fetch structured PR review comments for a branch")
     .requiredOption("-b, --branch <branch>", "PR head branch name")
     .requiredOption("-R, --repo <owner/repo>", "GitHub repository")
+    .option("--exclude-resolved", "Exclude resolved review threads", false)
+    .option("--exclude-outdated", "Exclude outdated review threads", false)
     .addOption(
       new Option("-f, --format <format>", "Output format")
         .choices(["json", "text"])
@@ -111,6 +115,8 @@ export const registerReviewCommand = (program: Command): void => {
       const result = await getStructuredReviewCommentsByBranch({
         branch: options.branch,
         cwd: options.cwd,
+        excludeOutdated: options.excludeOutdated,
+        excludeResolved: options.excludeResolved,
         owner,
         repo,
       });

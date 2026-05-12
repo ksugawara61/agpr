@@ -30,7 +30,7 @@ const makeBranchReviewComments = (): BranchReviewComments =>
               { body: "first comment", id: 1 },
               { body: "reply comment", id: 2 },
             ],
-            id: 101,
+            id: "PRRT_101",
             line: 12,
             path: "src/a.ts",
             startLine: 10,
@@ -92,6 +92,8 @@ describe("registerReviewCommand", () => {
     expect(mockGetStructuredReviewCommentsByBranch).toHaveBeenCalledWith({
       branch: "feature",
       cwd: "/repo",
+      excludeOutdated: false,
+      excludeResolved: false,
       owner: "o",
       repo: "r",
     });
@@ -104,7 +106,7 @@ describe("registerReviewCommand", () => {
               comments: ["first comment", "reply comment"],
               endLine: 12,
               startLine: 10,
-              threadId: "101",
+              threadId: "PRRT_101",
             },
           ],
         },
@@ -129,13 +131,43 @@ describe("registerReviewCommand", () => {
         "",
         "## File: src/a.ts",
         "",
-        "### Thread: 101",
+        "### Thread: PRRT_101",
         "- Lines: 10-12",
         "- Comments:",
         "1. first comment",
         "2. reply comment",
       ].join("\n"),
     );
+  });
+
+  it("passes resolved and outdated exclusion options", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    mockGetStructuredReviewCommentsByBranch.mockResolvedValueOnce(
+      makeBranchReviewComments(),
+    );
+
+    await createProgram().parseAsync(
+      [
+        "review",
+        "--branch",
+        "feature",
+        "--repo",
+        "o/r",
+        "--exclude-resolved",
+        "--exclude-outdated",
+      ],
+      { from: "user" },
+    );
+
+    expect(mockGetStructuredReviewCommentsByBranch).toHaveBeenCalledWith({
+      branch: "feature",
+      cwd: process.cwd(),
+      excludeOutdated: true,
+      excludeResolved: true,
+      owner: "o",
+      repo: "r",
+    });
+    expect(logSpy).toHaveBeenCalledOnce();
   });
 
   it("outputs an empty JSON filePaths array when no PR is found", async () => {

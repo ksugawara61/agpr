@@ -2,19 +2,19 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../../repositories/github.js", () => ({
   findPullRequestByBranch: vi.fn(),
-  listReviewComments: vi.fn(),
+  listReviewThreads: vi.fn(),
 }));
 
 import {
   findPullRequestByBranch,
   type GitHubPullRequest,
-  type GitHubReviewComment,
-  listReviewComments,
+  type GitHubReviewThread,
+  listReviewThreads,
 } from "../../repositories/github.js";
 import { getStructuredReviewCommentsByBranch } from "./get-structured-review-comments-by-branch.js";
 
 const mockFindPullRequestByBranch = vi.mocked(findPullRequestByBranch);
-const mockListReviewComments = vi.mocked(listReviewComments);
+const mockListReviewThreads = vi.mocked(listReviewThreads);
 
 const makePullRequest = (
   overrides: Partial<GitHubPullRequest> = {},
@@ -28,22 +28,24 @@ const makePullRequest = (
   ...overrides,
 });
 
-const makeReviewComment = (
-  overrides: Partial<GitHubReviewComment> = {},
-): GitHubReviewComment => ({
-  body: "comment",
-  created_at: "2026-05-12T00:00:00Z",
-  html_url: "https://github.com/o/r/pull/7#discussion_r1",
-  id: 1,
-  in_reply_to_id: null,
+const makeReviewThread = (
+  overrides: Partial<GitHubReviewThread> = {},
+): GitHubReviewThread => ({
+  comments: [
+    {
+      author: { login: "alice" },
+      body: "comment",
+      createdAt: "2026-05-12T00:00:00Z",
+      id: 1,
+      updatedAt: "2026-05-12T00:00:00Z",
+    },
+  ],
+  id: "PRRT_1",
+  isOutdated: false,
+  isResolved: false,
   line: 10,
   path: "src/a.ts",
-  pull_request_review_id: 100,
-  side: "RIGHT",
-  start_line: null,
-  start_side: null,
-  updated_at: "2026-05-12T00:00:00Z",
-  user: { login: "alice" },
+  startLine: null,
   ...overrides,
 });
 
@@ -65,103 +67,127 @@ describe("getStructuredReviewCommentsByBranch", () => {
     const result = await getStructuredReviewCommentsByBranch(args);
 
     expect(result).toBeNull();
-    expect(mockListReviewComments).not.toHaveBeenCalled();
+    expect(mockListReviewThreads).not.toHaveBeenCalled();
   });
 
   it("returns review comments grouped by file and thread", async () => {
     mockFindPullRequestByBranch.mockResolvedValueOnce(
       makePullRequest({ number: 17 }),
     );
-    mockListReviewComments.mockResolvedValueOnce([
-      makeReviewComment({
-        body: "root comment",
-        id: 1,
+    mockListReviewThreads.mockResolvedValueOnce([
+      makeReviewThread({
+        comments: [
+          {
+            author: { login: "alice" },
+            body: "root comment",
+            createdAt: "2026-05-12T00:00:00Z",
+            id: 1,
+            updatedAt: "2026-05-12T00:00:00Z",
+          },
+          {
+            author: { login: "bob" },
+            body: "reply comment",
+            createdAt: "2026-05-12T00:00:00Z",
+            id: 2,
+            updatedAt: "2026-05-12T00:00:00Z",
+          },
+        ],
+        id: "PRRT_1",
         line: 10,
         path: "src/a.ts",
-        user: { login: "alice" },
       }),
-      makeReviewComment({
-        body: "reply comment",
-        id: 2,
-        in_reply_to_id: 1,
-        line: 10,
-        path: "src/a.ts",
-        user: { login: "bob" },
-      }),
-      makeReviewComment({
-        body: "other file",
-        id: 3,
+      makeReviewThread({
+        comments: [
+          {
+            author: null,
+            body: "other file",
+            createdAt: "2026-05-12T00:00:00Z",
+            id: 3,
+            updatedAt: "2026-05-12T00:00:00Z",
+          },
+        ],
+        id: "PRRT_2",
         line: 20,
         path: "src/b.ts",
-        user: null,
       }),
-      {
-        body: "orphan reply",
-        id: 4,
-        in_reply_to_id: 999,
-        line: 30,
-        path: "src/a.ts",
-        start_line: null,
-      },
     ]);
 
     const result = await getStructuredReviewCommentsByBranch(args);
 
-    expect(mockListReviewComments).toHaveBeenCalledWith({
+    expect(mockListReviewThreads).toHaveBeenCalledWith({
       cwd: "/repo",
       owner: "o",
       pullNumber: 17,
       repo: "r",
     });
     expect(result?.pullRequest.number).toBe(17);
-    expect(result?.comments.map((comment) => comment.id)).toEqual([1, 2, 3, 4]);
+    expect(result?.comments.map((comment) => comment.id)).toEqual([1, 2, 3]);
     expect(result?.threads).toMatchObject([
       {
         comments: [
           { author: "alice", body: "root comment", id: 1 },
-          { author: "bob", body: "reply comment", id: 2, inReplyToId: 1 },
+          { author: "bob", body: "reply comment", id: 2 },
         ],
-        id: 1,
+        id: "PRRT_1",
+        isOutdated: false,
+        isResolved: false,
         line: 10,
         path: "src/a.ts",
       },
       {
         comments: [{ author: null, body: "other file", id: 3 }],
-        id: 3,
+        id: "PRRT_2",
+        isOutdated: false,
+        isResolved: false,
         line: 20,
         path: "src/b.ts",
-      },
-      {
-        comments: [
-          {
-            author: null,
-            body: "orphan reply",
-            createdAt: null,
-            htmlUrl: null,
-            id: 4,
-            inReplyToId: 999,
-            pullRequestReviewId: null,
-            side: null,
-            startSide: null,
-            updatedAt: null,
-          },
-        ],
-        id: 4,
-        line: 30,
-        path: "src/a.ts",
       },
     ]);
     expect(result?.files).toMatchObject([
       {
-        comments: [{ id: 1 }, { id: 2 }, { id: 4 }],
+        comments: [{ id: 1 }, { id: 2 }],
         path: "src/a.ts",
-        threads: [{ id: 1 }, { id: 4 }],
+        threads: [{ id: "PRRT_1" }],
       },
       {
         comments: [{ id: 3 }],
         path: "src/b.ts",
-        threads: [{ id: 3 }],
+        threads: [{ id: "PRRT_2" }],
       },
     ]);
+  });
+
+  it.each([
+    {
+      expectedThreadIds: ["active", "outdated"],
+      filters: { excludeResolved: true },
+      name: "excludes resolved review threads",
+    },
+    {
+      expectedThreadIds: ["active", "resolved"],
+      filters: { excludeOutdated: true },
+      name: "excludes outdated review threads",
+    },
+    {
+      expectedThreadIds: ["active"],
+      filters: { excludeOutdated: true, excludeResolved: true },
+      name: "excludes both resolved and outdated review threads",
+    },
+  ])("$name", async ({ filters, expectedThreadIds }) => {
+    mockFindPullRequestByBranch.mockResolvedValueOnce(makePullRequest());
+    mockListReviewThreads.mockResolvedValueOnce([
+      makeReviewThread({ id: "active" }),
+      makeReviewThread({ id: "resolved", isResolved: true }),
+      makeReviewThread({ id: "outdated", isOutdated: true }),
+    ]);
+
+    const result = await getStructuredReviewCommentsByBranch({
+      ...args,
+      ...filters,
+    });
+
+    expect(result?.threads.map((thread) => thread.id)).toEqual(
+      expectedThreadIds,
+    );
   });
 });

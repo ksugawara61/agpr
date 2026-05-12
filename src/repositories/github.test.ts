@@ -15,6 +15,7 @@ import {
   getPullRequest,
   listPullRequestReviews,
   listReviewComments,
+  listReviewThreads,
   parseRepoSlug,
   updateReview,
   updateReviewComment,
@@ -212,6 +213,65 @@ describe("listReviewComments", () => {
     ).rejects.toThrow(
       "gh api --paginate repos/o/r/pulls/404/comments --jq .[] | {id, path, line, start_line, side, start_side, body, html_url, pull_request_review_id, in_reply_to_id, created_at, updated_at, user: (.user | {login})} failed: not found",
     );
+  });
+});
+
+describe("listReviewThreads", () => {
+  it("parses paginated GraphQL review thread JSON lines", async () => {
+    const lines = [
+      JSON.stringify({
+        comments: [
+          {
+            author: { login: "alice" },
+            body: "thread comment",
+            createdAt: "2026-05-12T00:00:00Z",
+            id: 11,
+            updatedAt: "2026-05-12T00:00:00Z",
+          },
+        ],
+        id: "PRRT_1",
+        isOutdated: false,
+        isResolved: true,
+        line: 10,
+        path: "src/a.ts",
+        startLine: null,
+      }),
+      "",
+    ].join("\n");
+    stubOk(lines);
+
+    const threads = await listReviewThreads({
+      cwd: "/repo",
+      owner: "o",
+      pullNumber: 17,
+      repo: "r",
+    });
+
+    expect(threads).toEqual([
+      {
+        comments: [
+          {
+            author: { login: "alice" },
+            body: "thread comment",
+            createdAt: "2026-05-12T00:00:00Z",
+            id: 11,
+            updatedAt: "2026-05-12T00:00:00Z",
+          },
+        ],
+        id: "PRRT_1",
+        isOutdated: false,
+        isResolved: true,
+        line: 10,
+        path: "src/a.ts",
+        startLine: null,
+      },
+    ]);
+    const call = mockExeca.mock.calls[0];
+    expect(call[1]).toContain("graphql");
+    expect(call[1]).toContain("--paginate");
+    expect(call[1]).toContain("owner=o");
+    expect(call[1]).toContain("repo=r");
+    expect(call[1]).toContain("pullNumber=17");
   });
 });
 
