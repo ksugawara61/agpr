@@ -20,6 +20,7 @@ import {
   listReviewThreads,
   parseRepoSlug,
   requestCopilotReview,
+  updatePullRequestDescription,
   updateReview,
   updateReviewComment,
 } from "./github.js";
@@ -365,6 +366,36 @@ describe("requestCopilotReview", () => {
     expect(call[1]).toContain("o/r");
     expect(call[1]).toContain("--add-reviewer");
     expect(call[1]).toContain("@copilot");
+  });
+});
+
+describe("updatePullRequestDescription", () => {
+  it("sends PATCH to pulls endpoint with body payload", async () => {
+    stubOk(
+      JSON.stringify({ number: 42, url: "https://github.com/o/r/pull/42" }),
+    );
+
+    const result = await updatePullRequestDescription({
+      body: "## Background\n\nupdated",
+      cwd: "/repo",
+      owner: "o",
+      pullNumber: 42,
+      repo: "r",
+    });
+
+    expect(result).toEqual({
+      number: 42,
+      url: "https://github.com/o/r/pull/42",
+    });
+    const call = mockExeca.mock.calls[0];
+    expect(call[1]).toContain("api");
+    expect(call[1]).toContain("PATCH");
+    expect(call[1]).toContain("repos/o/r/pulls/42");
+    expect(call[1]).toContain("{number, url: .html_url}");
+    const opts = call[2] as unknown as { input?: string };
+    expect(JSON.parse(opts.input ?? "{}")).toEqual({
+      body: "## Background\n\nupdated",
+    });
   });
 });
 
