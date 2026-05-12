@@ -144,4 +144,5 @@ vite.config.ts.timestamp-*
 
 # Claude
 .claude/worktrees
+.claude/plans
 .claude/settings.local.json
