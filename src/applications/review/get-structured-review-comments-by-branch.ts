@@ -1,8 +1,9 @@
 import {
   findPullRequestByBranch,
   type GitHubPullRequest,
-  type GitHubReviewComment,
-  listReviewComments,
+  type GitHubReviewThread,
+  type GitHubReviewThreadComment,
+  listReviewThreads,
 } from "../../repositories/github.js";
 
 type StructuredReviewComment = {
@@ -23,7 +24,9 @@ type StructuredReviewComment = {
 
 type StructuredReviewThread = {
   comments: StructuredReviewComment[];
-  id: number;
+  id: string;
+  isOutdated: boolean;
+  isResolved: boolean;
   line: number | null;
   path: string;
   side: "LEFT" | "RIGHT" | null;
@@ -37,6 +40,11 @@ type StructuredReviewFile = {
   threads: StructuredReviewThread[];
 };
 
+type ReviewCommentFilters = {
+  excludeOutdated?: boolean;
+  excludeResolved?: boolean;
+};
+
 export type BranchReviewComments = {
   branch: string;
   comments: StructuredReviewComment[];
@@ -46,59 +54,57 @@ export type BranchReviewComments = {
 };
 
 const normalizeReviewComment = (
-  comment: GitHubReviewComment,
+  thread: GitHubReviewThread,
+  comment: GitHubReviewThreadComment,
 ): StructuredReviewComment => ({
-  author: comment.user?.login ?? null,
+  author: comment.author?.login ?? null,
   body: comment.body,
-  createdAt: comment.created_at ?? null,
-  htmlUrl: comment.html_url ?? null,
+  createdAt: comment.createdAt ?? null,
+  htmlUrl: null,
   id: comment.id,
-  inReplyToId: comment.in_reply_to_id ?? null,
-  line: comment.line,
-  path: comment.path,
-  pullRequestReviewId: comment.pull_request_review_id ?? null,
-  side: comment.side ?? null,
-  startLine: comment.start_line,
-  startSide: comment.start_side ?? null,
-  updatedAt: comment.updated_at ?? null,
+  inReplyToId: null,
+  line: thread.line,
+  path: thread.path,
+  pullRequestReviewId: null,
+  side: null,
+  startLine: thread.startLine,
+  startSide: null,
+  updatedAt: comment.updatedAt ?? null,
 });
 
-const createThread = (
-  rootComment: StructuredReviewComment,
-): StructuredReviewThread => ({
-  comments: [],
-  id: rootComment.id,
-  line: rootComment.line,
-  path: rootComment.path,
-  side: rootComment.side,
-  startLine: rootComment.startLine,
-  startSide: rootComment.startSide,
-});
+const shouldIncludeThread = (
+  thread: GitHubReviewThread,
+  filters: ReviewCommentFilters,
+): boolean =>
+  !(filters.excludeResolved === true && thread.isResolved) &&
+  !(filters.excludeOutdated === true && thread.isOutdated);
 
 const structureReviewComments = (
-  comments: GitHubReviewComment[],
+  reviewThreads: GitHubReviewThread[],
+  filters: ReviewCommentFilters,
 ): {
   comments: StructuredReviewComment[];
   files: StructuredReviewFile[];
   threads: StructuredReviewThread[];
 } => {
-  const normalizedComments = comments.map(normalizeReviewComment);
-  const commentsById = normalizedComments.reduce<
-    Map<number, StructuredReviewComment>
-  >((acc, comment) => acc.set(comment.id, comment), new Map());
-  const threadsById = normalizedComments.reduce<
-    Map<number, StructuredReviewThread>
-  >((acc, comment) => {
-    const rootComment =
-      comment.inReplyToId === null
-        ? comment
-        : (commentsById.get(comment.inReplyToId) ?? comment);
-    const thread = acc.get(rootComment.id) ?? createThread(rootComment);
-    thread.comments.push(comment);
-    acc.set(rootComment.id, thread);
-    return acc;
-  }, new Map());
-  const threads = Array.from(threadsById.values());
+  const threads = reviewThreads
+    .filter((thread) => shouldIncludeThread(thread, filters))
+    .map(
+      (thread): StructuredReviewThread => ({
+        comments: thread.comments.map((comment) =>
+          normalizeReviewComment(thread, comment),
+        ),
+        id: thread.id,
+        isOutdated: thread.isOutdated,
+        isResolved: thread.isResolved,
+        line: thread.line,
+        path: thread.path,
+        side: null,
+        startLine: thread.startLine,
+        startSide: null,
+      }),
+    );
+  const normalizedComments = threads.flatMap((thread) => thread.comments);
   const filesByPath = threads.reduce<Map<string, StructuredReviewFile>>(
     (acc, thread) => {
       const file = acc.get(thread.path) ?? {
@@ -123,6 +129,8 @@ const structureReviewComments = (
 export const getStructuredReviewCommentsByBranch = async (args: {
   branch: string;
   cwd: string;
+  excludeOutdated?: boolean;
+  excludeResolved?: boolean;
   owner: string;
   repo: string;
 }): Promise<BranchReviewComments | null> => {
@@ -130,7 +138,7 @@ export const getStructuredReviewCommentsByBranch = async (args: {
   if (pullRequest === null) {
     return null;
   }
-  const comments = await listReviewComments({
+  const reviewThreads = await listReviewThreads({
     cwd: args.cwd,
     owner: args.owner,
     pullNumber: pullRequest.number,
@@ -139,6 +147,6 @@ export const getStructuredReviewCommentsByBranch = async (args: {
   return {
     branch: args.branch,
     pullRequest,
-    ...structureReviewComments(comments),
+    ...structureReviewComments(reviewThreads, args),
   };
 };

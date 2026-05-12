@@ -27,6 +27,24 @@ export type GitHubReviewComment = {
   user?: { login?: string | null } | null;
 };
 
+export type GitHubReviewThreadComment = {
+  author?: { login?: string | null } | null;
+  body: string;
+  createdAt?: string | null;
+  id: number;
+  updatedAt?: string | null;
+};
+
+export type GitHubReviewThread = {
+  comments: GitHubReviewThreadComment[];
+  id: string;
+  isOutdated: boolean;
+  isResolved: boolean;
+  line: number | null;
+  path: string;
+  startLine: number | null;
+};
+
 export type ReviewCommentInput = {
   body: string;
   line: number;
@@ -133,6 +151,40 @@ export const ensureGhAuthenticated = async (): Promise<void> => {
 
 const PR_FIELDS = "number,headRefName,headRefOid,baseRefName,state,url";
 
+const REVIEW_THREADS_QUERY = `
+query($owner: String!, $repo: String!, $pullNumber: Int!, $endCursor: String) {
+  repository(owner: $owner, name: $repo) {
+    pullRequest(number: $pullNumber) {
+      reviewThreads(first: 100, after: $endCursor) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        nodes {
+          id
+          isResolved
+          isOutdated
+          path
+          line
+          startLine
+          comments(first: 100) {
+            nodes {
+              databaseId
+              body
+              createdAt
+              updatedAt
+              author {
+                login
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`.trim();
+
 export const findPullRequestByBranch = async (args: {
   branch: string;
   cwd: string;
@@ -196,6 +248,33 @@ export const listReviewComments = async (args: {
     { cwd: args.cwd },
   );
   return parseJsonLines<GitHubReviewComment>(stdout);
+};
+
+export const listReviewThreads = async (args: {
+  cwd: string;
+  owner: string;
+  pullNumber: number;
+  repo: string;
+}): Promise<GitHubReviewThread[]> => {
+  const { stdout } = await runGh(
+    [
+      "api",
+      "graphql",
+      "--paginate",
+      "-F",
+      `owner=${args.owner}`,
+      "-F",
+      `repo=${args.repo}`,
+      "-F",
+      `pullNumber=${args.pullNumber}`,
+      "-f",
+      `query=${REVIEW_THREADS_QUERY}`,
+      "--jq",
+      ".data.repository.pullRequest.reviewThreads.nodes[] | {id, isResolved, isOutdated, path, line, startLine, comments: [.comments.nodes[] | {id: .databaseId, body, createdAt, updatedAt, author: (.author | {login})}]}",
+    ],
+    { cwd: args.cwd },
+  );
+  return parseJsonLines<GitHubReviewThread>(stdout);
 };
 
 type GitHubReview = {

@@ -8,12 +8,46 @@ vi.mock(
   }),
 );
 
+import type { BranchReviewComments } from "../../applications/review/get-structured-review-comments-by-branch.js";
 import { getStructuredReviewCommentsByBranch } from "../../applications/review/get-structured-review-comments-by-branch.js";
 import { registerReviewCommand } from "./register-review-command.js";
 
 const mockGetStructuredReviewCommentsByBranch = vi.mocked(
   getStructuredReviewCommentsByBranch,
 );
+
+const makeBranchReviewComments = (): BranchReviewComments =>
+  ({
+    branch: "feature",
+    comments: [],
+    files: [
+      {
+        comments: [],
+        path: "src/a.ts",
+        threads: [
+          {
+            comments: [
+              { body: "first comment", id: 1 },
+              { body: "reply comment", id: 2 },
+            ],
+            id: "PRRT_101",
+            line: 12,
+            path: "src/a.ts",
+            startLine: 10,
+          },
+        ],
+      },
+    ],
+    pullRequest: {
+      baseRefName: "main",
+      headRefName: "feature",
+      headRefOid: "abc123",
+      number: 17,
+      state: "OPEN",
+      url: "https://github.com/o/r/pull/17",
+    },
+    threads: [],
+  }) as BranchReviewComments;
 
 const createProgram = (): Command => {
   const program = new Command();
@@ -35,25 +69,133 @@ afterEach(() => {
 });
 
 describe("registerReviewCommand", () => {
-  it("passes parsed CLI options to the review application", async () => {
-    const result = { branch: "feature" };
+  it("outputs compact JSON when format is json", async () => {
+    const result = makeBranchReviewComments();
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
-    mockGetStructuredReviewCommentsByBranch.mockResolvedValueOnce(
-      result as never,
-    );
+    mockGetStructuredReviewCommentsByBranch.mockResolvedValueOnce(result);
 
     await createProgram().parseAsync(
-      ["review", "--branch", "feature", "--repo", "o/r", "--cwd", "/repo"],
+      [
+        "review",
+        "--branch",
+        "feature",
+        "--repo",
+        "o/r",
+        "--cwd",
+        "/repo",
+        "--format",
+        "json",
+      ],
       { from: "user" },
     );
 
     expect(mockGetStructuredReviewCommentsByBranch).toHaveBeenCalledWith({
       branch: "feature",
       cwd: "/repo",
+      excludeOutdated: false,
+      excludeResolved: false,
       owner: "o",
       repo: "r",
     });
-    expect(logSpy).toHaveBeenCalledWith(JSON.stringify(result, null, 2));
+    expect(JSON.parse(logSpy.mock.calls[0][0] as string)).toEqual({
+      filePaths: [
+        {
+          filePath: "src/a.ts",
+          reviews: [
+            {
+              comments: ["first comment", "reply comment"],
+              endLine: 12,
+              startLine: 10,
+              threadId: "PRRT_101",
+            },
+          ],
+        },
+      ],
+    });
+  });
+
+  it("outputs AI-friendly text when format is text", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    mockGetStructuredReviewCommentsByBranch.mockResolvedValueOnce(
+      makeBranchReviewComments(),
+    );
+
+    await createProgram().parseAsync(
+      ["review", "--branch", "feature", "--repo", "o/r", "--format", "text"],
+      { from: "user" },
+    );
+
+    expect(logSpy).toHaveBeenCalledWith(
+      [
+        "# Review Comments",
+        "",
+        "## File: src/a.ts",
+        "",
+        "### Thread: PRRT_101",
+        "- Lines: 10-12",
+        "- Comments:",
+        "1. first comment",
+        "2. reply comment",
+      ].join("\n"),
+    );
+  });
+
+  it("passes resolved and outdated exclusion options", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    mockGetStructuredReviewCommentsByBranch.mockResolvedValueOnce(
+      makeBranchReviewComments(),
+    );
+
+    await createProgram().parseAsync(
+      [
+        "review",
+        "--branch",
+        "feature",
+        "--repo",
+        "o/r",
+        "--exclude-resolved",
+        "--exclude-outdated",
+      ],
+      { from: "user" },
+    );
+
+    expect(mockGetStructuredReviewCommentsByBranch).toHaveBeenCalledWith({
+      branch: "feature",
+      cwd: process.cwd(),
+      excludeOutdated: true,
+      excludeResolved: true,
+      owner: "o",
+      repo: "r",
+    });
+    expect(logSpy).toHaveBeenCalledOnce();
+  });
+
+  it("outputs an empty JSON filePaths array when no PR is found", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    mockGetStructuredReviewCommentsByBranch.mockResolvedValueOnce(null);
+
+    await createProgram().parseAsync(
+      ["review", "--branch", "feature", "--repo", "o/r"],
+      { from: "user" },
+    );
+
+    expect(JSON.parse(logSpy.mock.calls[0][0] as string)).toEqual({
+      filePaths: [],
+    });
+  });
+
+  it("outputs an AI-friendly empty text result when no PR is found", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    mockGetStructuredReviewCommentsByBranch.mockResolvedValueOnce(null);
+
+    await createProgram().parseAsync(
+      ["review", "--branch", "feature", "--repo", "o/r", "--format", "text"],
+      { from: "user" },
+    );
+
+    expect(logSpy).toHaveBeenCalledWith(
+      "# Review Comments\n\nNo review comments found.",
+    );
   });
 
   it("rejects invalid repo option format", async () => {
