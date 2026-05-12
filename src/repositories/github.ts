@@ -359,6 +359,29 @@ export const createDraftPullRequest = async (
   return JSON.parse(stdout) as GitHubCreatedPullRequest;
 };
 
+export const updatePullRequestDescription = async (args: {
+  body: string;
+  cwd: string;
+  owner: string;
+  pullNumber: number;
+  repo: string;
+}): Promise<GitHubCreatedPullRequest> => {
+  const { stdout } = await runGh(
+    [
+      "api",
+      "-X",
+      "PATCH",
+      `repos/${args.owner}/${args.repo}/pulls/${args.pullNumber}`,
+      "--input",
+      "-",
+      "--jq",
+      "{number, url: .html_url}",
+    ],
+    { cwd: args.cwd, input: JSON.stringify({ body: args.body }) },
+  );
+  return JSON.parse(stdout) as GitHubCreatedPullRequest;
+};
+
 export const requestCopilotReview = async (args: {
   cwd: string;
   owner: string;
