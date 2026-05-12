@@ -1,10 +1,25 @@
 import type { Command } from "commander";
-import { getStructuredReviewCommentsByBranch } from "../../applications/review/get-structured-review-comments-by-branch.js";
+import {
+  type BranchReviewComments,
+  getStructuredReviewCommentsByBranch,
+} from "../../applications/review/get-structured-review-comments-by-branch.js";
 
 type ReviewCommandOptions = {
   branch: string;
   cwd: string;
   repo: string;
+};
+
+type ReviewCommandOutput = {
+  filePaths: {
+    filePath: string;
+    reviews: {
+      comments: string[];
+      endLine: number | null;
+      startLine: number | null;
+      threadId: string;
+    }[];
+  }[];
 };
 
 const parseRepoOption = (repo: string): { owner: string; repo: string } => {
@@ -14,6 +29,21 @@ const parseRepoOption = (repo: string): { owner: string; repo: string } => {
   }
   return { owner, repo: repoName };
 };
+
+const formatReviewCommandOutput = (
+  result: BranchReviewComments | null,
+): ReviewCommandOutput => ({
+  filePaths:
+    result?.files.map((file) => ({
+      filePath: file.path,
+      reviews: file.threads.map((thread) => ({
+        comments: thread.comments.map((comment) => comment.body),
+        endLine: thread.line,
+        startLine: thread.startLine,
+        threadId: String(thread.id),
+      })),
+    })) ?? [],
+});
 
 export const registerReviewCommand = (program: Command): void => {
   program
@@ -30,6 +60,6 @@ export const registerReviewCommand = (program: Command): void => {
         owner,
         repo,
       });
-      console.log(JSON.stringify(result, null, 2));
+      console.log(JSON.stringify(formatReviewCommandOutput(result), null, 2));
     });
 };
