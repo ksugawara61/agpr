@@ -11,6 +11,7 @@ import {
   ensureGhAuthenticated,
   findPullRequestByBranch,
   GhNotAuthenticatedError,
+  GhNotInstalledError,
   getPullRequest,
   listPullRequestReviews,
   listReviewComments,
@@ -75,6 +76,13 @@ describe("ensureGhAuthenticated", () => {
   it("resolves when `gh auth status` succeeds", async () => {
     stubOk("Logged in to github.com");
     await expect(ensureGhAuthenticated()).resolves.toBeUndefined();
+  });
+
+  it("throws GhNotInstalledError when `gh` is missing", async () => {
+    stubFail("spawn gh ENOENT", "ENOENT");
+    await expect(ensureGhAuthenticated()).rejects.toBeInstanceOf(
+      GhNotInstalledError,
+    );
   });
 
   it("throws GhNotAuthenticatedError when `gh auth status` exits non-zero", async () => {
@@ -189,6 +197,21 @@ describe("listReviewComments", () => {
     expect(comments).toHaveLength(2);
     expect(comments[0].body).toBe("first");
     expect(comments[1].start_line).toBe(18);
+  });
+
+  it("wraps gh api failures with command details", async () => {
+    stubFail("not found");
+
+    await expect(
+      listReviewComments({
+        cwd: "/repo",
+        owner: "o",
+        pullNumber: 404,
+        repo: "r",
+      }),
+    ).rejects.toThrow(
+      "gh api --paginate repos/o/r/pulls/404/comments --jq .[] | {id, path, line, start_line, side, start_side, body, html_url, pull_request_review_id, in_reply_to_id, created_at, updated_at, user: (.user | {login})} failed: not found",
+    );
   });
 });
 

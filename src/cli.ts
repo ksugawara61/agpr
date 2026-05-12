@@ -1,5 +1,6 @@
 import { Command } from "commander";
 import packageJson from "../package.json";
+import { registerReviewCommand } from "./presentations/review/register-review-command.js";
 
 const program = new Command();
 
@@ -8,4 +9,9 @@ program
   .description(packageJson.description)
   .version(packageJson.version);
 
-program.parse();
+registerReviewCommand(program);
+
+program.parseAsync().catch((error: unknown) => {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exitCode = 1;
+});

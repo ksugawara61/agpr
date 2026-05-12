@@ -13,10 +13,18 @@ export type GitHubPullRequest = {
 
 export type GitHubReviewComment = {
   body: string;
+  created_at?: string | null;
+  html_url?: string | null;
   id: number;
+  in_reply_to_id?: number | null;
   line: number | null;
   path: string;
+  pull_request_review_id?: number | null;
+  side?: "LEFT" | "RIGHT" | null;
   start_line: number | null;
+  start_side?: "LEFT" | "RIGHT" | null;
+  updated_at?: string | null;
+  user?: { login?: string | null } | null;
 };
 
 export type ReviewCommentInput = {
@@ -108,6 +116,12 @@ const runGh = async (
   }
 };
 
+const parseJsonLines = <T>(stdout: string): T[] =>
+  stdout
+    .split("\n")
+    .filter((line) => line.trim() !== "")
+    .map((line) => JSON.parse(line) as T);
+
 export const ensureGhAuthenticated = async (): Promise<void> => {
   try {
     await execa("gh", ["auth", "status"], { reject: true });
@@ -177,14 +191,11 @@ export const listReviewComments = async (args: {
       "--paginate",
       `repos/${args.owner}/${args.repo}/pulls/${args.pullNumber}/comments`,
       "--jq",
-      ".[] | {id, path, line, start_line, body}",
+      ".[] | {id, path, line, start_line, side, start_side, body, html_url, pull_request_review_id, in_reply_to_id, created_at, updated_at, user: (.user | {login})}",
     ],
     { cwd: args.cwd },
   );
-  return stdout
-    .split("\n")
-    .filter((line) => line.trim() !== "")
-    .map((line) => JSON.parse(line) as GitHubReviewComment);
+  return parseJsonLines<GitHubReviewComment>(stdout);
 };
 
 type GitHubReview = {
@@ -210,10 +221,7 @@ export const listPullRequestReviews = async (args: {
     ],
     { cwd: args.cwd },
   );
-  return stdout
-    .split("\n")
-    .filter((line) => line.trim() !== "")
-    .map((line) => JSON.parse(line) as GitHubReview);
+  return parseJsonLines<GitHubReview>(stdout);
 };
 
 export const updateReview = async (args: {
