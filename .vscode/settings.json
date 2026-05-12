@@ -22,5 +22,6 @@
     "editor.formatOnPaste": true,
     "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
   },
-  "github.copilot.nextEditSuggestions.enabled": true
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "json.schemaDownload.enable": true
 }
