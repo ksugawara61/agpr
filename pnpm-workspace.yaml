@@ -1,2 +1,4 @@
 allowBuilds:
   lefthook: true
+
+minimumReleaseAge: 4320
