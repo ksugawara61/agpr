@@ -1,7 +1,8 @@
 {
   "author": "ksugawara61",
   "dependencies": {
-    "commander": "^14.0.3"
+    "commander": "^14.0.3",
+    "execa": "^9.6.1"
   },
   "description": "command line tool to optimize Github pull request review process",
   "devDependencies": {
@@ -25,6 +26,7 @@
     "knip": "knip",
     "lint": "biome lint .",
     "prepare": "if test \"$CI\" != \"true\" ; then lefthook install; fi",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "version": "0.0.1"
