@@ -7,6 +7,7 @@ vi.mock("execa", () => ({
 import { execa } from "execa";
 import {
   addPullRequestReviewThreadReply,
+  createDraftPullRequest,
   createReview,
   createReviewCommentSingle,
   ensureGhAuthenticated,
@@ -305,6 +306,42 @@ describe("addPullRequestReviewThreadReply", () => {
     expect(
       call[1]?.some((arg) => arg.includes("addPullRequestReviewThreadReply")),
     ).toBe(true);
+  });
+});
+
+describe("createDraftPullRequest", () => {
+  it("sends POST to pulls endpoint with draft payload", async () => {
+    stubOk(
+      JSON.stringify({ number: 42, url: "https://github.com/o/r/pull/42" }),
+    );
+
+    const result = await createDraftPullRequest({
+      baseBranch: "main",
+      body: "## Background\n\nwhy",
+      cwd: "/repo",
+      headBranch: "feature/create-draft-pr",
+      owner: "o",
+      repo: "r",
+      title: "Add draft PR command",
+    });
+
+    expect(result).toEqual({
+      number: 42,
+      url: "https://github.com/o/r/pull/42",
+    });
+    const call = mockExeca.mock.calls[0];
+    expect(call[1]).toContain("api");
+    expect(call[1]).toContain("POST");
+    expect(call[1]).toContain("repos/o/r/pulls");
+    expect(call[1]).toContain("{number, url: .html_url}");
+    const opts = call[2] as unknown as { input?: string };
+    expect(JSON.parse(opts.input ?? "{}")).toEqual({
+      base: "main",
+      body: "## Background\n\nwhy",
+      draft: true,
+      head: "feature/create-draft-pr",
+      title: "Add draft PR command",
+    });
   });
 });
 

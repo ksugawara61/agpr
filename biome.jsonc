@@ -19,6 +19,7 @@
       "biome.jsonc",
       "package.json",
       "**/*.ts",
+      "!**/.claude/worktrees",
       "!**/node_modules",
       "!**/dist",
       "!**/coverage",
