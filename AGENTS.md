@@ -12,8 +12,8 @@
 
 - コードを書く、変更する、レビューするときは、作業対象に応じて `.github/instructions` ディレクトリ配下の Markdown ファイルを必ず参照してください。
 - 各ルールファイルの front matter にある `applyTo` / `paths` を対象ファイルの glob として扱い、該当するルールを優先してください。
-- TypeScript / TSX ファイルを扱う場合は `.github/instructions/shared/typescript.md` を参照してください。
-- テストファイル（`*.test.ts` / `*.test.tsx`）を扱う場合は `.github/instructions/shared/test.md` も参照してください。
+- TypeScript / TSX ファイルを扱う場合は `.github/instructions/shared/typescript.instructions.md` を参照してください。
+- テストファイル（`*.test.ts` / `*.test.tsx`）を扱う場合は `.github/instructions/shared/test.instructions.md` も参照してください。
 - `.github/instructions` 配下に新しいルールが追加されている場合は、その内容も同じ優先度で確認してください。
 
 ## 開発コマンド
