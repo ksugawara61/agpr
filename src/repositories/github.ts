@@ -45,6 +45,12 @@ export type GitHubReviewThread = {
   startLine: number | null;
 };
 
+export type GitHubReviewThreadReply = {
+  body: string;
+  createdAt: string;
+  id: number | null;
+};
+
 export type ReviewCommentInput = {
   body: string;
   line: number;
@@ -185,6 +191,18 @@ query($owner: String!, $repo: String!, $pullNumber: Int!, $endCursor: String) {
 }
 `.trim();
 
+const ADD_PULL_REQUEST_REVIEW_THREAD_REPLY_MUTATION = `
+mutation($threadId: ID!, $body: String!) {
+  addPullRequestReviewThreadReply(input: {pullRequestReviewThreadId: $threadId, body: $body}) {
+    comment {
+      databaseId
+      body
+      createdAt
+    }
+  }
+}
+`.trim();
+
 export const findPullRequestByBranch = async (args: {
   branch: string;
   cwd: string;
@@ -275,6 +293,29 @@ export const listReviewThreads = async (args: {
     { cwd: args.cwd },
   );
   return parseJsonLines<GitHubReviewThread>(stdout);
+};
+
+export const addPullRequestReviewThreadReply = async (args: {
+  body: string;
+  cwd: string;
+  threadId: string;
+}): Promise<GitHubReviewThreadReply> => {
+  const { stdout } = await runGh(
+    [
+      "api",
+      "graphql",
+      "-F",
+      `threadId=${args.threadId}`,
+      "-f",
+      `body=${args.body}`,
+      "-f",
+      `query=${ADD_PULL_REQUEST_REVIEW_THREAD_REPLY_MUTATION}`,
+      "--jq",
+      ".data.addPullRequestReviewThreadReply.comment | {id: .databaseId, body, createdAt}",
+    ],
+    { cwd: args.cwd },
+  );
+  return JSON.parse(stdout) as GitHubReviewThreadReply;
 };
 
 type GitHubReview = {
