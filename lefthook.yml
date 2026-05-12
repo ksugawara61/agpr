@@ -12,4 +12,5 @@ pre-push:
     knip:
       run: pnpm knip
     coverage:
+      glob: "src/**/*.{ts,tsx}"
       run: CI=true npx diff-coverage measure --threshold 85
