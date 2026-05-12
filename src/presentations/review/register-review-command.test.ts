@@ -8,13 +8,19 @@ vi.mock(
   }),
 );
 
+vi.mock("../../applications/review/reply-to-review-threads.js", () => ({
+  replyToReviewThreads: vi.fn(),
+}));
+
 import type { BranchReviewComments } from "../../applications/review/get-structured-review-comments-by-branch.js";
 import { getStructuredReviewCommentsByBranch } from "../../applications/review/get-structured-review-comments-by-branch.js";
+import { replyToReviewThreads } from "../../applications/review/reply-to-review-threads.js";
 import { registerReviewCommand } from "./register-review-command.js";
 
 const mockGetStructuredReviewCommentsByBranch = vi.mocked(
   getStructuredReviewCommentsByBranch,
 );
+const mockReplyToReviewThreads = vi.mocked(replyToReviewThreads);
 
 const makeBranchReviewComments = (): BranchReviewComments =>
   ({
@@ -205,5 +211,78 @@ describe("registerReviewCommand", () => {
         { from: "user" },
       ),
     ).rejects.toThrow("--repo must be in owner/repo format: invalid");
+  });
+
+  it("replies to PR review threads from JSON input", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    const input = {
+      replies: [
+        {
+          commitHashs: ["abc123", "def456"],
+          message: "対応しました",
+          threadId: "PRRT_1",
+        },
+      ],
+    };
+    mockReplyToReviewThreads.mockResolvedValueOnce({
+      results: [
+        {
+          body: ["対応しました", "", "Commits:", "- abc123", "- def456"].join(
+            "\n",
+          ),
+          createdAt: "2026-05-12T00:00:00Z",
+          success: true,
+          threadId: "PRRT_1",
+        },
+      ],
+    });
+
+    await createProgram().parseAsync(
+      ["review-reply", "--input", JSON.stringify(input), "--cwd", "/repo"],
+      { from: "user" },
+    );
+
+    expect(mockReplyToReviewThreads).toHaveBeenCalledWith({
+      cwd: "/repo",
+      replies: input.replies,
+    });
+    expect(JSON.parse(logSpy.mock.calls[0][0] as string)).toEqual({
+      results: [
+        {
+          body: ["対応しました", "", "Commits:", "- abc123", "- def456"].join(
+            "\n",
+          ),
+          createdAt: "2026-05-12T00:00:00Z",
+          success: true,
+          threadId: "PRRT_1",
+        },
+      ],
+    });
+  });
+
+  it.each([
+    {
+      expected: "--input must be valid JSON",
+      input: "{",
+      name: "rejects invalid JSON",
+    },
+    {
+      expected: "replies must be a non-empty array",
+      input: JSON.stringify({ replies: [] }),
+      name: "rejects empty replies",
+    },
+    {
+      expected: "replies[0].commitHashs must be a non-empty string array",
+      input: JSON.stringify({
+        replies: [{ commitHashs: [], message: "done", threadId: "PRRT_1" }],
+      }),
+      name: "rejects empty commitHashs",
+    },
+  ])("$name", async ({ input, expected }) => {
+    await expect(
+      createProgram().parseAsync(["review-reply", "--input", input], {
+        from: "user",
+      }),
+    ).rejects.toThrow(expected);
   });
 });

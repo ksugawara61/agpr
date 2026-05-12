@@ -6,6 +6,7 @@ vi.mock("execa", () => ({
 
 import { execa } from "execa";
 import {
+  addPullRequestReviewThreadReply,
   createReview,
   createReviewCommentSingle,
   ensureGhAuthenticated,
@@ -272,6 +273,38 @@ describe("listReviewThreads", () => {
     expect(call[1]).toContain("owner=o");
     expect(call[1]).toContain("repo=r");
     expect(call[1]).toContain("pullNumber=17");
+  });
+});
+
+describe("addPullRequestReviewThreadReply", () => {
+  it("posts a GraphQL reply to a review thread", async () => {
+    stubOk(
+      JSON.stringify({
+        body: "reply body",
+        createdAt: "2026-05-12T00:00:00Z",
+        id: 123,
+      }),
+    );
+
+    const result = await addPullRequestReviewThreadReply({
+      body: "reply body",
+      cwd: "/repo",
+      threadId: "PRRT_1",
+    });
+
+    expect(result).toEqual({
+      body: "reply body",
+      createdAt: "2026-05-12T00:00:00Z",
+      id: 123,
+    });
+    const call = mockExeca.mock.calls[0];
+    expect(call[1]).toContain("api");
+    expect(call[1]).toContain("graphql");
+    expect(call[1]).toContain("threadId=PRRT_1");
+    expect(call[1]).toContain("body=reply body");
+    expect(
+      call[1]?.some((arg) => arg.includes("addPullRequestReviewThreadReply")),
+    ).toBe(true);
   });
 });
 
