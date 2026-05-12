@@ -1,1 +1,1 @@
-# gh-agpr
+# agpr
