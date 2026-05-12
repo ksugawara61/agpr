@@ -7,6 +7,7 @@ import {
 import { readTextFile } from "../../repositories/file-system.js";
 
 type CreateDraftPullRequestCommandOptions = {
+  copilot: boolean;
   cwd: string;
   input: string;
   repo: string;
@@ -98,6 +99,7 @@ export const registerCreateDraftPullRequestCommand = (
       "JSON input matching {title,background,issueId,changes,headBranch,baseBranch}",
     )
     .requiredOption("-R, --repo <owner/repo>", "GitHub repository")
+    .option("--copilot", "Request a GitHub Copilot review", false)
     .option("--template <path>", "Markdown template file")
     .option("--cwd <path>", "Working directory", process.cwd())
     .action(async (options: CreateDraftPullRequestCommandOptions) => {
@@ -107,6 +109,7 @@ export const registerCreateDraftPullRequestCommand = (
         readTemplate(options),
       ]);
       const result = await createDraftPullRequest({
+        copilot: options.copilot,
         cwd: options.cwd,
         input,
         owner,

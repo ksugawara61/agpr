@@ -359,6 +359,26 @@ export const createDraftPullRequest = async (
   return JSON.parse(stdout) as GitHubCreatedPullRequest;
 };
 
+export const requestCopilotReview = async (args: {
+  cwd: string;
+  owner: string;
+  pullNumber: number;
+  repo: string;
+}): Promise<void> => {
+  await runGh(
+    [
+      "pr",
+      "edit",
+      String(args.pullNumber),
+      "--repo",
+      `${args.owner}/${args.repo}`,
+      "--add-reviewer",
+      "@copilot",
+    ],
+    { cwd: args.cwd },
+  );
+};
+
 type GitHubReview = {
   body: string;
   html_url: string;

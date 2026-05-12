@@ -1,6 +1,7 @@
 import {
   createDraftPullRequest as createGitHubDraftPullRequest,
   type GitHubCreatedPullRequest,
+  requestCopilotReview,
 } from "../../repositories/github.js";
 
 const DEFAULT_BASE_BRANCH = "main";
@@ -68,6 +69,7 @@ export const renderPullRequestTemplate = (
 };
 
 export const createDraftPullRequest = async (args: {
+  copilot?: boolean;
   cwd: string;
   input: CreateDraftPullRequestInput;
   owner: string;
@@ -91,5 +93,13 @@ export const createDraftPullRequest = async (args: {
     repo: args.repo,
     title: args.input.title,
   });
+  if (args.copilot === true) {
+    await requestCopilotReview({
+      cwd: args.cwd,
+      owner: args.owner,
+      pullNumber: pullRequest.number,
+      repo: args.repo,
+    });
+  }
   return toOutput(pullRequest);
 };

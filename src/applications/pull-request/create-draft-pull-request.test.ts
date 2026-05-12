@@ -2,9 +2,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../../repositories/github.js", () => ({
   createDraftPullRequest: vi.fn(),
+  requestCopilotReview: vi.fn(),
 }));
 
-import { createDraftPullRequest as createGitHubDraftPullRequest } from "../../repositories/github.js";
+import {
+  createDraftPullRequest as createGitHubDraftPullRequest,
+  requestCopilotReview,
+} from "../../repositories/github.js";
 import {
   type CreateDraftPullRequestInput,
   createDraftPullRequest,
@@ -14,6 +18,7 @@ import {
 const mockCreateGitHubDraftPullRequest = vi.mocked(
   createGitHubDraftPullRequest,
 );
+const mockRequestCopilotReview = vi.mocked(requestCopilotReview);
 
 const makeInput = (
   overrides: Partial<CreateDraftPullRequestInput> = {},
@@ -131,5 +136,27 @@ describe("createDraftPullRequest", () => {
         body: "Issue: #123\n- draft PR command\n- template rendering",
       }),
     );
+  });
+
+  it("requests a Copilot review when copilot is true", async () => {
+    mockCreateGitHubDraftPullRequest.mockResolvedValueOnce({
+      number: 42,
+      url: "https://github.com/o/r/pull/42",
+    });
+
+    await createDraftPullRequest({
+      copilot: true,
+      cwd: "/repo",
+      input: makeInput(),
+      owner: "o",
+      repo: "r",
+    });
+
+    expect(mockRequestCopilotReview).toHaveBeenCalledWith({
+      cwd: "/repo",
+      owner: "o",
+      pullNumber: 42,
+      repo: "r",
+    });
   });
 });

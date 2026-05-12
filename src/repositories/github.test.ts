@@ -19,6 +19,7 @@ import {
   listReviewComments,
   listReviewThreads,
   parseRepoSlug,
+  requestCopilotReview,
   updateReview,
   updateReviewComment,
 } from "./github.js";
@@ -342,6 +343,28 @@ describe("createDraftPullRequest", () => {
       head: "feature/create-draft-pr",
       title: "Add draft PR command",
     });
+  });
+});
+
+describe("requestCopilotReview", () => {
+  it("adds @copilot as a pull request reviewer", async () => {
+    stubOk("");
+
+    await requestCopilotReview({
+      cwd: "/repo",
+      owner: "o",
+      pullNumber: 42,
+      repo: "r",
+    });
+
+    const call = mockExeca.mock.calls[0];
+    expect(call[1]).toContain("pr");
+    expect(call[1]).toContain("edit");
+    expect(call[1]).toContain("42");
+    expect(call[1]).toContain("--repo");
+    expect(call[1]).toContain("o/r");
+    expect(call[1]).toContain("--add-reviewer");
+    expect(call[1]).toContain("@copilot");
   });
 });
 
