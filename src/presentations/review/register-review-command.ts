@@ -1,12 +1,15 @@
-import type { Command } from "commander";
+import { type Command, Option } from "commander";
 import {
   type BranchReviewComments,
   getStructuredReviewCommentsByBranch,
 } from "../../applications/review/get-structured-review-comments-by-branch.js";
 
+type OutputFormat = "json" | "text";
+
 type ReviewCommandOptions = {
   branch: string;
   cwd: string;
+  format: OutputFormat;
   repo: string;
 };
 
@@ -45,12 +48,63 @@ const formatReviewCommandOutput = (
     })) ?? [],
 });
 
+const formatLineRange = (
+  startLine: number | null,
+  endLine: number | null,
+): string => {
+  const start = startLine === null ? "null" : String(startLine);
+  const end = endLine === null ? "null" : String(endLine);
+  return `${start}-${end}`;
+};
+
+const formatTextReviewCommandOutput = (
+  result: BranchReviewComments | null,
+): string => {
+  const output = formatReviewCommandOutput(result);
+  if (output.filePaths.length === 0) {
+    return "# Review Comments\n\nNo review comments found.";
+  }
+  return [
+    "# Review Comments",
+    ...output.filePaths.map((file) =>
+      [
+        "",
+        `## File: ${file.filePath}`,
+        ...file.reviews.map((review) =>
+          [
+            "",
+            `### Thread: ${review.threadId}`,
+            `- Lines: ${formatLineRange(review.startLine, review.endLine)}`,
+            "- Comments:",
+            ...review.comments.map(
+              (comment, index) => `${index + 1}. ${comment}`,
+            ),
+          ].join("\n"),
+        ),
+      ].join("\n"),
+    ),
+  ].join("\n");
+};
+
+const formatCommandOutput = (
+  result: BranchReviewComments | null,
+  format: OutputFormat,
+): string =>
+  format === "json"
+    ? JSON.stringify(formatReviewCommandOutput(result), null, 2)
+    : formatTextReviewCommandOutput(result);
+
 export const registerReviewCommand = (program: Command): void => {
   program
     .command("review")
     .description("Fetch structured PR review comments for a branch")
     .requiredOption("-b, --branch <branch>", "PR head branch name")
     .requiredOption("-R, --repo <owner/repo>", "GitHub repository")
+    .addOption(
+      new Option("-f, --format <format>", "Output format")
+        .choices(["json", "text"])
+        .default("json"),
+    )
     .option("--cwd <path>", "Working directory", process.cwd())
     .action(async (options: ReviewCommandOptions) => {
       const { owner, repo } = parseRepoOption(options.repo);
@@ -60,6 +114,6 @@ export const registerReviewCommand = (program: Command): void => {
         owner,
         repo,
       });
-      console.log(JSON.stringify(formatReviewCommandOutput(result), null, 2));
+      console.log(formatCommandOutput(result, options.format));
     });
 };
