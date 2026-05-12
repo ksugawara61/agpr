@@ -1,5 +1,7 @@
 import { addPullRequestReviewThreadReply } from "../../repositories/github.js";
 
+const REVIEW_REPLY_FOOTER = "🤖 create by agpr";
+
 export type ReviewThreadReplyInput = {
   commitHashs: string[];
   message: string;
@@ -29,6 +31,8 @@ export const formatReviewThreadReplyBody = (
     "",
     "Commits:",
     ...reply.commitHashs.map((commitHash) => `- ${commitHash}`),
+    "",
+    REVIEW_REPLY_FOOTER,
   ].join("\n");
 
 export const replyToReviewThreads = async (args: {

@@ -24,6 +24,16 @@ const makeReplyInput = (
   ...overrides,
 });
 
+const makeReplyBody = (message: string, commitHashs: string[]): string =>
+  [
+    message,
+    "",
+    "Commits:",
+    ...commitHashs.map((commitHash) => `- ${commitHash}`),
+    "",
+    "🤖 create by agpr",
+  ].join("\n");
+
 beforeEach(() => {
   vi.clearAllMocks();
 });
@@ -34,14 +44,14 @@ describe("formatReviewThreadReplyBody", () => {
       formatReviewThreadReplyBody(
         makeReplyInput({ commitHashs: ["abc123", "def456"] }),
       ),
-    ).toBe(["対応しました", "", "Commits:", "- abc123", "- def456"].join("\n"));
+    ).toBe(makeReplyBody("対応しました", ["abc123", "def456"]));
   });
 });
 
 describe("replyToReviewThreads", () => {
   it("posts replies and returns successful results", async () => {
     mockAddPullRequestReviewThreadReply.mockResolvedValueOnce({
-      body: ["対応しました", "", "Commits:", "- abc123"].join("\n"),
+      body: makeReplyBody("対応しました", ["abc123"]),
       createdAt: "2026-05-12T00:00:00Z",
       id: 10,
     });
@@ -52,14 +62,14 @@ describe("replyToReviewThreads", () => {
     });
 
     expect(mockAddPullRequestReviewThreadReply).toHaveBeenCalledWith({
-      body: ["対応しました", "", "Commits:", "- abc123"].join("\n"),
+      body: makeReplyBody("対応しました", ["abc123"]),
       cwd: "/repo",
       threadId: "PRRT_1",
     });
     expect(result).toEqual({
       results: [
         {
-          body: ["対応しました", "", "Commits:", "- abc123"].join("\n"),
+          body: makeReplyBody("対応しました", ["abc123"]),
           createdAt: "2026-05-12T00:00:00Z",
           success: true,
           threadId: "PRRT_1",
@@ -72,7 +82,7 @@ describe("replyToReviewThreads", () => {
     mockAddPullRequestReviewThreadReply
       .mockRejectedValueOnce(new Error("not found"))
       .mockResolvedValueOnce({
-        body: ["done", "", "Commits:", "- def456"].join("\n"),
+        body: makeReplyBody("done", ["def456"]),
         createdAt: "2026-05-12T01:00:00Z",
         id: 11,
       });
@@ -97,7 +107,7 @@ describe("replyToReviewThreads", () => {
           threadId: "PRRT_fail",
         },
         {
-          body: ["done", "", "Commits:", "- def456"].join("\n"),
+          body: makeReplyBody("done", ["def456"]),
           createdAt: "2026-05-12T01:00:00Z",
           success: true,
           threadId: "PRRT_ok",
