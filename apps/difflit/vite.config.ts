@@ -1,5 +1,10 @@
 import { builtinModules } from "node:module";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
+
+const repositoriesSourcePath = fileURLToPath(
+  new URL("../../packages/repositories/src", import.meta.url),
+);
 
 const externalModuleNames = [
   ...builtinModules,
@@ -30,6 +35,16 @@ export default defineConfig({
     sourcemap: false,
   },
   resolve: {
+    alias: [
+      {
+        find: /^@agpr\/repositories\/(.+)$/,
+        replacement: `${repositoriesSourcePath}/$1.ts`,
+      },
+      {
+        find: "@agpr/repositories",
+        replacement: `${repositoriesSourcePath}/index.ts`,
+      },
+    ],
     conditions: ["node"],
   },
 });

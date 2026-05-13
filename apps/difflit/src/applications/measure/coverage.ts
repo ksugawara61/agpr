@@ -2,8 +2,8 @@ import { relative, resolve } from "node:path";
 import type {
   CoverageSummary,
   FileDetail,
-} from "../../repositories/coverage-files.js";
-import type { DiffFile } from "../../repositories/git.js";
+} from "@agpr/repositories/coverage-files";
+import type { DiffFile } from "@agpr/repositories/git";
 
 type CoverageMetric = { covered: number; pct: number; total: number };
 

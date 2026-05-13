@@ -102,6 +102,10 @@ importers:
       execa:
         specifier: 'catalog:'
         version: 9.6.1
+    devDependencies:
+      '@agpr/repositories':
+        specifier: workspace:*
+        version: link:../../packages/repositories
 
   packages/repositories:
     dependencies:

@@ -1,12 +1,12 @@
 import {
   readCoverageFinal,
   readCoverageSummary,
-} from "../../repositories/coverage-files.js";
-import type { DiffFile } from "../../repositories/git.js";
-import { getDiffFiles } from "../../repositories/git.js";
-import { runVitest } from "../../repositories/runners/vitest.js";
+} from "@agpr/repositories/coverage-files";
+import type { DiffFile } from "@agpr/repositories/git";
+import { getDiffFiles } from "@agpr/repositories/git";
 import { globToRegex } from "../shared/glob.js";
 import { computeFileCoverages, type DiffCoverageResult } from "./coverage.js";
+import { runVitest } from "./runner-orchestrator.js";
 
 export type MeasureOptions = {
   base?: string;

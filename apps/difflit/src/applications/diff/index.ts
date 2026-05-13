@@ -1,4 +1,4 @@
-import type { DiffFile } from "../../repositories/git.js";
+import type { DiffFile } from "@agpr/repositories/git";
 
 export const formatDiffFiles = (diffFiles: DiffFile[]): string =>
   [

@@ -9,6 +9,9 @@
     "execa": "catalog:"
   },
   "description": "Vitest diff coverage measurement CLI",
+  "devDependencies": {
+    "@agpr/repositories": "workspace:*"
+  },
   "files": [
     "dist/**/*",
     "!src/**/*"
