@@ -25,6 +25,8 @@
   "name": "@agpr/repositories",
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "lint": "biome lint .",
+    "test": "vitest run --config vitest.config.ts --root ../.. packages/repositories/src --coverage --coverage.include=packages/repositories/src/**/*.ts --coverage.reportsDirectory=packages/repositories/coverage",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "type": "module",

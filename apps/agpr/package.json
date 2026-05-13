@@ -18,6 +18,8 @@
   "name": "@ksugawara61/agpr",
   "scripts": {
     "build": "vite build",
+    "lint": "biome lint .",
+    "test": "vitest run --config vitest.config.ts --root ../.. apps/agpr/src --coverage --coverage.include=apps/agpr/src/**/*.ts --coverage.reportsDirectory=apps/agpr/coverage",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "type": "module",

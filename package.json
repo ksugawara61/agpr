@@ -7,6 +7,7 @@
     "esbuild": "catalog:",
     "knip": "catalog:",
     "lefthook": "catalog:",
+    "turbo": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:"
@@ -16,14 +17,14 @@
   "packageManager": "pnpm@11.1.0+sha512.0c44e842e5686b2c061a81adda8b2258bd8818e9704b2cf2c63d56b931a7b2e910092e085027003b96ca3911ab56a07f6df5abaed2be9925034cdd686a535b14",
   "private": true,
   "scripts": {
-    "build": "pnpm --dir packages/repositories build && pnpm --dir apps/agpr build",
+    "build": "turbo run build",
     "coverage": "pnpm test",
     "fmt": "biome check --write .",
     "knip": "knip",
-    "lint": "biome lint .",
+    "lint": "biome lint .claude/settings.json biome.jsonc package.json vitest.config.ts && turbo run lint",
     "prepare": "bash scripts/install-lefthook.sh",
-    "test": "vitest run --coverage",
-    "typecheck": "tsc --noEmit"
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck"
   },
   "version": "0.0.1"
 }
