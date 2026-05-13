@@ -1,0 +1,4 @@
+interface:
+  display_name: "AGPR Issue"
+  short_description: "Issue対応からDraft PR作成まで一括実行"
+  default_prompt: "Use $agpr-issue to implement GitHub issue 20 and open a draft PR."
