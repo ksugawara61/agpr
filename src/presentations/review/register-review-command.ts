@@ -25,6 +25,7 @@ type ReviewCommandOutput = {
       threadId: string;
     }[];
   }[];
+  message?: string;
 };
 
 const parseRepoOption = (repo: string): { owner: string; repo: string } => {
@@ -37,9 +38,16 @@ const parseRepoOption = (repo: string): { owner: string; repo: string } => {
 
 const formatReviewCommandOutput = (
   result: BranchReviewComments | null,
-): ReviewCommandOutput => ({
-  filePaths:
-    result?.files.map((file) => ({
+  branch: string,
+): ReviewCommandOutput => {
+  if (result === null) {
+    return {
+      filePaths: [],
+      message: `No open pull request found for branch: ${branch}.`,
+    };
+  }
+  return {
+    filePaths: result.files.map((file) => ({
       filePath: file.path,
       reviews: file.threads.map((thread) => ({
         comments: thread.comments.map((comment) => comment.body),
@@ -47,8 +55,9 @@ const formatReviewCommandOutput = (
         startLine: thread.startLine,
         threadId: String(thread.id),
       })),
-    })) ?? [],
-});
+    })),
+  };
+};
 
 const formatLineRange = (
   startLine: number | null,
@@ -61,8 +70,12 @@ const formatLineRange = (
 
 const formatTextReviewCommandOutput = (
   result: BranchReviewComments | null,
+  branch: string,
 ): string => {
-  const output = formatReviewCommandOutput(result);
+  if (result === null) {
+    return `# Review Comments\n\nNo open pull request found for branch: ${branch}.`;
+  }
+  const output = formatReviewCommandOutput(result, branch);
   if (output.filePaths.length === 0) {
     return "# Review Comments\n\nNo review comments found.";
   }
@@ -90,11 +103,12 @@ const formatTextReviewCommandOutput = (
 
 const formatCommandOutput = (
   result: BranchReviewComments | null,
+  branch: string,
   format: OutputFormat,
 ): string =>
   format === "json"
-    ? JSON.stringify(formatReviewCommandOutput(result), null, 2)
-    : formatTextReviewCommandOutput(result);
+    ? JSON.stringify(formatReviewCommandOutput(result, branch), null, 2)
+    : formatTextReviewCommandOutput(result, branch);
 
 export const registerReviewCommand = (program: Command): void => {
   program
@@ -120,6 +134,6 @@ export const registerReviewCommand = (program: Command): void => {
         owner,
         repo,
       });
-      console.log(formatCommandOutput(result, options.format));
+      console.log(formatCommandOutput(result, options.branch, options.format));
     });
 };

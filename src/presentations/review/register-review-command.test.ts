@@ -170,7 +170,7 @@ describe("registerReviewCommand", () => {
     expect(logSpy).toHaveBeenCalledOnce();
   });
 
-  it("outputs an empty JSON filePaths array when no PR is found", async () => {
+  it("outputs a JSON message when no PR is found", async () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
     mockGetStructuredReviewCommentsByBranch.mockResolvedValueOnce(null);
 
@@ -181,12 +181,32 @@ describe("registerReviewCommand", () => {
 
     expect(JSON.parse(logSpy.mock.calls[0][0] as string)).toEqual({
       filePaths: [],
+      message: "No open pull request found for branch: feature.",
     });
   });
 
-  it("outputs an AI-friendly empty text result when no PR is found", async () => {
+  it("outputs an AI-friendly no PR text result when no PR is found", async () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
     mockGetStructuredReviewCommentsByBranch.mockResolvedValueOnce(null);
+
+    await createProgram().parseAsync(
+      ["review", "--branch", "feature", "--repo", "o/r", "--format", "text"],
+      { from: "user" },
+    );
+
+    expect(logSpy).toHaveBeenCalledWith(
+      "# Review Comments\n\nNo open pull request found for branch: feature.",
+    );
+  });
+
+  it("outputs an AI-friendly empty text result when a PR has no comments", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    mockGetStructuredReviewCommentsByBranch.mockResolvedValueOnce({
+      ...makeBranchReviewComments(),
+      comments: [],
+      files: [],
+      threads: [],
+    });
 
     await createProgram().parseAsync(
       ["review", "--branch", "feature", "--repo", "o/r", "--format", "text"],
