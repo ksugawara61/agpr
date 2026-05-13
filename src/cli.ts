@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import packageJson from "../package.json";
+import packageJson from "../package.json" with { type: "json" };
 import { registerCreateDraftPullRequestCommand } from "./presentations/pull-request/register-create-draft-pull-request-command.js";
 import { registerUpdatePullRequestCommand } from "./presentations/pull-request/register-update-pull-request-command.js";
 import { registerReviewCommand } from "./presentations/review/register-review-command.js";

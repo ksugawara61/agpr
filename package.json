@@ -12,9 +12,11 @@
     "@biomejs/biome": "^2.4.15",
     "@types/node": "^25.6.2",
     "@vitest/coverage-v8": "^4.1.5",
+    "esbuild": "^0.28.0",
     "knip": "^6.12.2",
     "lefthook": "^2.1.6",
     "typescript": "^6.0.3",
+    "vite": "^8.0.11",
     "vitest": "^4.1.5"
   },
   "keywords": [],
@@ -23,7 +25,7 @@
   "name": "agpr",
   "packageManager": "pnpm@11.1.0+sha512.0c44e842e5686b2c061a81adda8b2258bd8818e9704b2cf2c63d56b931a7b2e910092e085027003b96ca3911ab56a07f6df5abaed2be9925034cdd686a535b14",
   "scripts": {
-    "build": "tsc",
+    "build": "vite build",
     "coverage": "vitest run --coverage",
     "fmt": "biome check --write .",
     "knip": "knip",
@@ -32,5 +34,6 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
+  "type": "module",
   "version": "0.0.1"
 }
