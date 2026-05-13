@@ -19,6 +19,11 @@
     "vite": "^8.0.11",
     "vitest": "^4.1.5"
   },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "!src/**/*"
+  ],
   "keywords": [],
   "license": "MIT",
   "main": "dist/cli.js",
