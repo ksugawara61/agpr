@@ -1,0 +1,26 @@
+{
+  "author": "ksugawara61",
+  "bin": {
+    "difflit": "dist/cli.js"
+  },
+  "dependencies": {
+    "@vitest/coverage-v8": "catalog:",
+    "commander": "catalog:",
+    "execa": "catalog:"
+  },
+  "description": "Vitest diff coverage measurement CLI",
+  "files": [
+    "dist/**/*",
+    "!src/**/*"
+  ],
+  "keywords": [],
+  "license": "MIT",
+  "main": "dist/cli.js",
+  "name": "@agpr/difflit",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "type": "module",
+  "version": "0.0.3"
+}

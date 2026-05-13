@@ -91,6 +91,18 @@ importers:
         specifier: workspace:*
         version: link:../../packages/repositories
 
+  apps/difflit:
+    dependencies:
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 4.1.5(vitest@4.1.5)
+      commander:
+        specifier: 'catalog:'
+        version: 14.0.3
+      execa:
+        specifier: 'catalog:'
+        version: 9.6.1
+
   packages/repositories:
     dependencies:
       execa:
