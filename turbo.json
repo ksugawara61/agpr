@@ -2,22 +2,14 @@
   "$schema": "https://turbo.build/schema.json",
   "cacheDir": ".turbo/cache",
   "globalDependencies": [
-    "biome.jsonc",
     "pnpm-lock.yaml",
     "pnpm-workspace.yaml",
-    "tsconfig.base.json",
-    "vitest.config.ts"
+    "tsconfig.base.json"
   ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
-    },
-    "lint": {
-      "outputs": []
-    },
-    "test": {
-      "outputs": ["coverage/**"]
     },
     "typecheck": {
       "dependsOn": ["^typecheck"],

@@ -21,9 +21,9 @@
     "coverage": "pnpm test",
     "fmt": "biome check --write .",
     "knip": "knip",
-    "lint": "biome lint .claude/settings.json biome.jsonc package.json vitest.config.ts && turbo run lint",
+    "lint": "biome lint .",
     "prepare": "bash scripts/install-lefthook.sh",
-    "test": "turbo run test",
+    "test": "vitest run --coverage",
     "typecheck": "turbo run typecheck"
   },
   "version": "0.0.1"
