@@ -17,6 +17,18 @@
         "matcher": "Write|Edit"
       }
     ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/block-npx.sh",
+            "if": "Bash(npx*)",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
     "SessionStart": [
       {
         "hooks": [
@@ -37,10 +49,11 @@
       "Bash(pnpm test *)",
       "Bash(pnpm lint *)",
       "Bash(pnpm typecheck *)",
-      "Bash(pnpm install *)"
+      "Bash(pnpm install *)",
+      "Bash(npx @ksugawara61/agpr@latest*)"
     ],
     "defaultMode": "plan",
-    "deny": ["Bash(npm:*)", "Bash(npx:*)", "Bash(rm:*)"]
+    "deny": ["Bash(npm:*)", "Bash(rm:*)"]
   },
   "statusLine": {
     "command": "jq -r '\"[\\(.model.display_name)] \\(.context_window.used_percentage // 0)% context\"'",
