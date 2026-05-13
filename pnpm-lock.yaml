@@ -80,12 +80,16 @@ importers:
 
   apps/agpr:
     dependencies:
-      '@agpr/repositories':
-        specifier: workspace:*
-        version: link:../../packages/repositories
       commander:
         specifier: 'catalog:'
         version: 14.0.3
+      execa:
+        specifier: 'catalog:'
+        version: 9.6.1
+    devDependencies:
+      '@agpr/repositories':
+        specifier: workspace:*
+        version: link:../../packages/repositories
 
   packages/repositories:
     dependencies:

@@ -3,6 +3,7 @@
   "ignoreBinaries": ["gh", "diff-coverage"],
   "workspaces": {
     "apps/agpr": {
+      "ignoreDependencies": ["execa"],
       "paths": {
         "@agpr/repositories": [
           "../../packages/repositories/src/index.ts"

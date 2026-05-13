@@ -1,16 +1,20 @@
 import { builtinModules } from "node:module";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
+
+const repositoriesSourcePath = fileURLToPath(
+  new URL("../../packages/repositories/src", import.meta.url),
+);
 
 const externalModuleNames = [
   ...builtinModules,
   ...builtinModules.map((moduleName) => `node:${moduleName}`),
   "commander",
+  "execa",
 ];
 
 const isExternalModule = (id: string): boolean =>
-  externalModuleNames.includes(id) ||
-  id === "@agpr/repositories" ||
-  id.startsWith("@agpr/repositories/");
+  externalModuleNames.includes(id);
 
 export default defineConfig({
   build: {
@@ -28,5 +32,18 @@ export default defineConfig({
       },
     },
     sourcemap: false,
+  },
+  resolve: {
+    alias: [
+      {
+        find: /^@agpr\/repositories\/(.+)$/,
+        replacement: `${repositoriesSourcePath}/$1.ts`,
+      },
+      {
+        find: "@agpr/repositories",
+        replacement: `${repositoriesSourcePath}/index.ts`,
+      },
+    ],
+    conditions: ["node"],
   },
 });
