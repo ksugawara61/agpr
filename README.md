@@ -67,7 +67,7 @@ Reply to one or more GitHub PR review threads.
 ```sh
 node dist/cli.js review-reply \
   --input '{"replies":[{"threadId":"PRRT_xxx","commitHashs":["abc123"],"message":"Fixed in this commit."}]}' \
-  --format markdown
+  --format text
 ```
 
 Input fields:
@@ -79,7 +79,7 @@ Input fields:
 Options:
 
 - `--input <json>`: JSON payload containing `replies`.
-- `--format <json|markdown>`: Output format. Defaults to `json`.
+- `--format <json|text>`: Output format. Defaults to `json`.
 - `--cwd <path>`: Working directory.
 
 ### Create a draft pull request

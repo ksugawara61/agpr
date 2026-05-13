@@ -84,7 +84,7 @@ describe("registerReviewReplyCommand", () => {
     });
   });
 
-  it("outputs markdown when format is markdown", async () => {
+  it("outputs text when format is text", async () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
     const input = {
       replies: [
@@ -112,13 +112,7 @@ describe("registerReviewReplyCommand", () => {
     });
 
     await createProgram().parseAsync(
-      [
-        "review-reply",
-        "--input",
-        JSON.stringify(input),
-        "--format",
-        "markdown",
-      ],
+      ["review-reply", "--input", JSON.stringify(input), "--format", "text"],
       { from: "user" },
     );
 
