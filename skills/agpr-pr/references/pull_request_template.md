@@ -17,7 +17,7 @@
 
 ## 関連 Issue
 
-{{issueId}}
+Fixed {{issueId}}
 
 ## 変更内容
 
