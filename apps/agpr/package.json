@@ -4,10 +4,13 @@
     "agpr": "dist/cli.js"
   },
   "dependencies": {
-    "@agpr/repositories": "workspace:*",
-    "commander": "catalog:"
+    "commander": "catalog:",
+    "execa": "catalog:"
   },
   "description": "command line tool to optimize Github pull request review process",
+  "devDependencies": {
+    "@agpr/repositories": "workspace:*"
+  },
   "files": [
     "dist/**/*",
     "!src/**/*"
