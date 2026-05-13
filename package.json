@@ -34,7 +34,7 @@
     "fmt": "biome check --write .",
     "knip": "knip",
     "lint": "biome lint .",
-    "prepare": "if test \"$CI\" != \"true\" ; then lefthook install; fi",
+    "prepare": "bash scripts/install-lefthook.sh",
     "test": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
