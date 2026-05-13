@@ -24,7 +24,8 @@
     "lint": "biome lint .",
     "prepare": "bash scripts/install-lefthook.sh",
     "test": "vitest run --coverage",
-    "typecheck": "turbo run typecheck"
+    "typecheck": "turbo run typecheck",
+    "verup": "node --experimental-strip-types scripts/cd/verup.ts"
   },
   "version": "0.0.2"
 }
