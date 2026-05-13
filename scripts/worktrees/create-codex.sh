@@ -6,7 +6,8 @@ usage() {
 Usage: scripts/worktrees/codex <name> [codex-args...]
 
 Creates a git worktree at .codex/worktrees/codex/<name>, copies paths
-listed in .worktreeinclude, installs dependencies, and starts codex.
+listed in .worktreeinclude, installs dependencies, starts codex, and removes
+the worktree after codex exits.
 USAGE
 }
 
@@ -71,4 +72,15 @@ fi
 
 cd "${worktree_dir}"
 pnpm install
-exec codex "$@"
+
+codex_status=0
+codex "$@" || codex_status=$?
+
+remove_status=0
+"${repo_root}/scripts/worktrees/remove-codex.sh" || remove_status=$?
+
+if [[ "${codex_status}" -ne 0 ]]; then
+  exit "${codex_status}"
+fi
+
+exit "${remove_status}"
