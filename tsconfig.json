@@ -1,18 +1,15 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "target": "es2025",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "types": ["node"]
+    "paths": {
+      "@agpr/repositories": [
+        "./packages/repositories/src/index.ts"
+      ],
+      "@agpr/repositories/*": [
+        "./packages/repositories/src/*.ts"
+      ]
+    }
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist",  "src/**/*.test.ts"]
+  "exclude": ["node_modules", "**/dist", "**/*.test.ts"],
+  "include": ["apps/*/src/**/*.ts", "packages/*/src/**/*.ts"]
 }

@@ -1,0 +1,25 @@
+{
+  "author": "ksugawara61",
+  "bin": {
+    "agpr": "dist/cli.js"
+  },
+  "dependencies": {
+    "@agpr/repositories": "workspace:*",
+    "commander": "catalog:"
+  },
+  "description": "command line tool to optimize Github pull request review process",
+  "files": [
+    "dist/**/*",
+    "!src/**/*"
+  ],
+  "keywords": [],
+  "license": "MIT",
+  "main": "dist/cli.js",
+  "name": "@ksugawara61/agpr",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "type": "module",
+  "version": "0.0.1"
+}

@@ -1,21 +1,16 @@
 import { resolve } from "node:path";
+import { readTextFile } from "@agpr/repositories/file-system";
 import type { Command } from "commander";
 import {
-  type CreateDraftPullRequestInput,
-  createDraftPullRequest,
-} from "../../applications/pull-request/create-draft-pull-request.js";
-import { readTextFile } from "../../repositories/file-system.js";
+  type UpdatePullRequestInput,
+  updatePullRequest,
+} from "../../applications/pull-request/update-pull-request.js";
 
-type CreateDraftPullRequestCommandOptions = {
-  copilot: boolean;
+type UpdatePullRequestCommandOptions = {
   cwd: string;
   input: string;
   repo: string;
   template?: string;
-};
-
-type CreateDraftPullRequestCommandInput = CreateDraftPullRequestInput & {
-  baseBranch: string;
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -48,9 +43,9 @@ const parseStringArrayField = (value: unknown, path: string): string[] => {
   return value;
 };
 
-const parseCreateDraftPullRequestCommandInput = (
+const parseUpdatePullRequestCommandInput = (
   input: string,
-): CreateDraftPullRequestCommandInput => {
+): UpdatePullRequestInput => {
   let parsed: unknown;
   try {
     parsed = JSON.parse(input);
@@ -64,12 +59,9 @@ const parseCreateDraftPullRequestCommandInput = (
 
   return {
     background: parseStringField(parsed.background, "background"),
-    baseBranch:
-      parseOptionalStringField(parsed.baseBranch, "baseBranch") ?? "main",
+    branchName: parseStringField(parsed.branchName, "branchName"),
     changes: parseStringArrayField(parsed.changes, "changes"),
-    headBranch: parseStringField(parsed.headBranch, "headBranch"),
     issueId: parseOptionalStringField(parsed.issueId, "issueId"),
-    title: parseStringField(parsed.title, "title"),
   };
 };
 
@@ -82,34 +74,30 @@ const parseRepoOption = (repo: string): { owner: string; repo: string } => {
 };
 
 const readTemplate = async (
-  options: CreateDraftPullRequestCommandOptions,
+  options: UpdatePullRequestCommandOptions,
 ): Promise<string | undefined> =>
   options.template === undefined
     ? undefined
     : readTextFile(resolve(options.cwd, options.template));
 
-export const registerCreateDraftPullRequestCommand = (
-  program: Command,
-): void => {
+export const registerUpdatePullRequestCommand = (program: Command): void => {
   program
-    .command("create-draft-pr")
-    .description("Create a draft pull request with a predefined template")
+    .command("update-pr")
+    .description("Update pull request description with a predefined template")
     .requiredOption(
       "--input <json>",
-      "JSON input matching {title,background,issueId,changes,headBranch,baseBranch}",
+      "JSON input matching {branchName,background,issueId,changes}",
     )
     .requiredOption("-R, --repo <owner/repo>", "GitHub repository")
-    .option("--copilot", "Request a GitHub Copilot review", false)
     .option("--template <path>", "Markdown template file")
     .option("--cwd <path>", "Working directory", process.cwd())
-    .action(async (options: CreateDraftPullRequestCommandOptions) => {
+    .action(async (options: UpdatePullRequestCommandOptions) => {
       const { owner, repo } = parseRepoOption(options.repo);
       const [input, template] = await Promise.all([
-        Promise.resolve(parseCreateDraftPullRequestCommandInput(options.input)),
+        Promise.resolve(parseUpdatePullRequestCommandInput(options.input)),
         readTemplate(options),
       ]);
-      const result = await createDraftPullRequest({
-        copilot: options.copilot,
+      const result = await updatePullRequest({
         cwd: options.cwd,
         input,
         owner,

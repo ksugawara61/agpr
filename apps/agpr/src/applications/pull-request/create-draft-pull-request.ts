@@ -1,8 +1,10 @@
 import {
-  findPullRequestByBranch,
+  createDraftPullRequest as createGitHubDraftPullRequest,
   type GitHubCreatedPullRequest,
-  updatePullRequestDescription,
-} from "../../repositories/github.js";
+  requestCopilotReview,
+} from "@agpr/repositories/github";
+
+const DEFAULT_BASE_BRANCH = "main";
 
 const DEFAULT_PULL_REQUEST_TEMPLATE = [
   "## Background",
@@ -18,14 +20,16 @@ const DEFAULT_PULL_REQUEST_TEMPLATE = [
   "{{changes}}",
 ].join("\n");
 
-export type UpdatePullRequestInput = {
+export type CreateDraftPullRequestInput = {
   background: string;
-  branchName: string;
+  baseBranch?: string;
   changes: string[];
+  headBranch: string;
   issueId?: string;
+  title: string;
 };
 
-export type UpdatePullRequestOutput = {
+export type CreateDraftPullRequestOutput = {
   pullRequestNumber: number;
   pullRequestUrl: string;
 };
@@ -36,24 +40,26 @@ const formatChanges = (changes: string[]): string =>
   changes.map((change) => `- ${change}`).join("\n");
 
 const toTemplateValues = (
-  input: UpdatePullRequestInput,
+  input: CreateDraftPullRequestInput,
 ): PullRequestTemplateValues => ({
   background: input.background,
-  branchName: input.branchName,
+  baseBranch: input.baseBranch ?? DEFAULT_BASE_BRANCH,
   changes: formatChanges(input.changes),
+  headBranch: input.headBranch,
   issueId: input.issueId ?? "N/A",
+  title: input.title,
 });
 
 const toOutput = (
   pullRequest: GitHubCreatedPullRequest,
-): UpdatePullRequestOutput => ({
+): CreateDraftPullRequestOutput => ({
   pullRequestNumber: pullRequest.number,
   pullRequestUrl: pullRequest.url,
 });
 
-export const renderUpdatePullRequestTemplate = (
+export const renderPullRequestTemplate = (
   template: string,
-  input: UpdatePullRequestInput,
+  input: CreateDraftPullRequestInput,
 ): string => {
   const values = toTemplateValues(input);
   return template.replace(
@@ -62,35 +68,38 @@ export const renderUpdatePullRequestTemplate = (
   );
 };
 
-export const updatePullRequest = async (args: {
+export const createDraftPullRequest = async (args: {
+  copilot?: boolean;
   cwd: string;
-  input: UpdatePullRequestInput;
+  input: CreateDraftPullRequestInput;
   owner: string;
   repo: string;
   template?: string;
-}): Promise<UpdatePullRequestOutput> => {
-  const pullRequest = await findPullRequestByBranch({
-    branch: args.input.branchName,
-    cwd: args.cwd,
-    owner: args.owner,
-    repo: args.repo,
-  });
-  if (pullRequest === null) {
-    throw new Error(
-      `No open pull request found for branch: ${args.input.branchName}`,
-    );
-  }
-
-  const body = renderUpdatePullRequestTemplate(
+}): Promise<CreateDraftPullRequestOutput> => {
+  const baseBranch = args.input.baseBranch ?? DEFAULT_BASE_BRANCH;
+  const body = renderPullRequestTemplate(
     args.template ?? DEFAULT_PULL_REQUEST_TEMPLATE,
-    args.input,
+    {
+      ...args.input,
+      baseBranch,
+    },
   );
-  const updatedPullRequest = await updatePullRequestDescription({
+  const pullRequest = await createGitHubDraftPullRequest({
+    baseBranch,
     body,
     cwd: args.cwd,
+    headBranch: args.input.headBranch,
     owner: args.owner,
-    pullNumber: pullRequest.number,
     repo: args.repo,
+    title: args.input.title,
   });
-  return toOutput(updatedPullRequest);
+  if (args.copilot === true) {
+    await requestCopilotReview({
+      cwd: args.cwd,
+      owner: args.owner,
+      pullNumber: pullRequest.number,
+      repo: args.repo,
+    });
+  }
+  return toOutput(pullRequest);
 };

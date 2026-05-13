@@ -1,4 +1,4 @@
-import { addPullRequestReviewThreadReply } from "../../repositories/github.js";
+import { addPullRequestReviewThreadReply } from "@agpr/repositories/github";
 
 const REVIEW_REPLY_FOOTER = "🤖 create by agpr";
 
