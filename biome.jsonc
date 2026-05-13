@@ -19,8 +19,8 @@
       "biome.jsonc",
       "package.json",
       "**/*.ts",
-      "!**/.claude/worktrees",
-      "!**/.codex/worktrees",
+      "!.claude/worktrees",
+      "!.codex/worktrees",
       "!**/node_modules",
       "!**/dist",
       "!**/coverage",
@@ -82,7 +82,7 @@
   },
   "overrides": [
     {
-      "includes": ["**/vitest.config.ts"],
+      "includes": ["**/vite.config.ts", "**/vitest.config.ts"],
       "linter": {
         "rules": {
           "style": {
