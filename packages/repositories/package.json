@@ -8,9 +8,17 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
+    "./coverage-files": {
+      "import": "./dist/coverage-files.js",
+      "types": "./dist/coverage-files.d.ts"
+    },
     "./file-system": {
       "import": "./dist/file-system.js",
       "types": "./dist/file-system.d.ts"
+    },
+    "./git": {
+      "import": "./dist/git.js",
+      "types": "./dist/git.d.ts"
     },
     "./github": {
       "import": "./dist/github.js",
