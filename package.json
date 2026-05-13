@@ -27,5 +27,5 @@
     "typecheck": "turbo run typecheck",
     "verup": "node --experimental-strip-types scripts/cd/verup.ts"
   },
-  "version": "0.0.2"
+  "version": "0.0.3"
 }
