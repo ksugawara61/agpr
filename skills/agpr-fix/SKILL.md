@@ -66,7 +66,7 @@ CI=true npx @ksugawara61/agpr@latest review \
 ```bash
 CI=true npx @ksugawara61/agpr@latest review-reply \
   --input '{"replies":[{"threadId":"PRRT_xxx","commitHashs":["<hash>"],"message":"<日本語サマリ>"},...]}' \
-  --format markdown
+  --format text
 ```
 
 - `commitHashs` は必ず 1 件以上設定する。空で送らない。

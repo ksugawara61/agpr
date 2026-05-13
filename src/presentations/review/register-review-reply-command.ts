@@ -5,7 +5,7 @@ import {
   replyToReviewThreads,
 } from "../../applications/review/reply-to-review-threads.js";
 
-type ReviewReplyOutputFormat = "json" | "markdown";
+type ReviewReplyOutputFormat = "json" | "text";
 
 type ReviewReplyCommandOptions = {
   cwd: string;
@@ -79,7 +79,7 @@ const formatJsonReviewReplyCommandOutput = (
   result: ReviewThreadRepliesResult,
 ): string => JSON.stringify(result, null, 2);
 
-const formatMarkdownReviewReplyCommandOutput = (
+const formatTextReviewReplyCommandOutput = (
   result: ReviewThreadRepliesResult,
 ): string => {
   if (result.results.length === 0) {
@@ -112,7 +112,7 @@ const formatReviewReplyCommandOutput = (
 ): string =>
   format === "json"
     ? formatJsonReviewReplyCommandOutput(result)
-    : formatMarkdownReviewReplyCommandOutput(result);
+    : formatTextReviewReplyCommandOutput(result);
 
 export const registerReviewReplyCommand = (program: Command): void => {
   program
@@ -124,7 +124,7 @@ export const registerReviewReplyCommand = (program: Command): void => {
     )
     .addOption(
       new Option("-f, --format <format>", "Output format")
-        .choices(["json", "markdown"])
+        .choices(["json", "text"])
         .default("json"),
     )
     .option("--cwd <path>", "Working directory", process.cwd())
