@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@ksugawara61/agpr-repositories/github", () => ({
+vi.mock("@agpr/repositories/github", () => ({
   createDraftPullRequest: vi.fn(),
   requestCopilotReview: vi.fn(),
 }));
@@ -8,7 +8,7 @@ vi.mock("@ksugawara61/agpr-repositories/github", () => ({
 import {
   createDraftPullRequest as createGitHubDraftPullRequest,
   requestCopilotReview,
-} from "@ksugawara61/agpr-repositories/github";
+} from "@agpr/repositories/github";
 import {
   type CreateDraftPullRequestInput,
   createDraftPullRequest,

@@ -5,11 +5,11 @@ vi.mock("../../applications/pull-request/update-pull-request.js", () => ({
   updatePullRequest: vi.fn(),
 }));
 
-vi.mock("@ksugawara61/agpr-repositories/file-system", () => ({
+vi.mock("@agpr/repositories/file-system", () => ({
   readTextFile: vi.fn(),
 }));
 
-import { readTextFile } from "@ksugawara61/agpr-repositories/file-system";
+import { readTextFile } from "@agpr/repositories/file-system";
 import { updatePullRequest } from "../../applications/pull-request/update-pull-request.js";
 import { registerUpdatePullRequestCommand } from "./register-update-pull-request-command.js";
 

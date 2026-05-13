@@ -2,10 +2,10 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "paths": {
-      "@ksugawara61/agpr-repositories": [
+      "@agpr/repositories": [
         "./packages/repositories/src/index.ts"
       ],
-      "@ksugawara61/agpr-repositories/*": [
+      "@agpr/repositories/*": [
         "./packages/repositories/src/*.ts"
       ]
     }

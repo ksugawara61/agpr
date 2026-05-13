@@ -4,7 +4,7 @@
     "agpr": "dist/cli.js"
   },
   "dependencies": {
-    "@ksugawara61/agpr-repositories": "workspace:*",
+    "@agpr/repositories": "workspace:*",
     "commander": "catalog:"
   },
   "description": "command line tool to optimize Github pull request review process",

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@ksugawara61/agpr-repositories/github", () => ({
+vi.mock("@agpr/repositories/github", () => ({
   findPullRequestByBranch: vi.fn(),
   updatePullRequestDescription: vi.fn(),
 }));
@@ -9,7 +9,7 @@ import {
   findPullRequestByBranch,
   type GitHubPullRequest,
   updatePullRequestDescription,
-} from "@ksugawara61/agpr-repositories/github";
+} from "@agpr/repositories/github";
 import {
   renderUpdatePullRequestTemplate,
   type UpdatePullRequestInput,

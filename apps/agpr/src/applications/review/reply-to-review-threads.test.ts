@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@ksugawara61/agpr-repositories/github", () => ({
+vi.mock("@agpr/repositories/github", () => ({
   addPullRequestReviewThreadReply: vi.fn(),
 }));
 
-import { addPullRequestReviewThreadReply } from "@ksugawara61/agpr-repositories/github";
+import { addPullRequestReviewThreadReply } from "@agpr/repositories/github";
 import {
   formatReviewThreadReplyBody,
   type ReviewThreadReplyInput,

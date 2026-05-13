@@ -4,10 +4,10 @@
   "workspaces": {
     "apps/agpr": {
       "paths": {
-        "@ksugawara61/agpr-repositories": [
+        "@agpr/repositories": [
           "../../packages/repositories/src/index.ts"
         ],
-        "@ksugawara61/agpr-repositories/*": [
+        "@agpr/repositories/*": [
           "../../packages/repositories/src/*.ts"
         ]
       },

@@ -1,5 +1,5 @@
 import { resolve } from "node:path";
-import { readTextFile } from "@ksugawara61/agpr-repositories/file-system";
+import { readTextFile } from "@agpr/repositories/file-system";
 import type { Command } from "commander";
 import {
   type CreateDraftPullRequestInput,

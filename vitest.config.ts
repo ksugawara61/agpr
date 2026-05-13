@@ -9,11 +9,11 @@ export default defineConfig({
   resolve: {
     alias: [
       {
-        find: /^@ksugawara61\/agpr-repositories\/(.+)$/,
+        find: /^@agpr\/repositories\/(.+)$/,
         replacement: `${repositoriesSourcePath}/$1.ts`,
       },
       {
-        find: "@ksugawara61/agpr-repositories",
+        find: "@agpr/repositories",
         replacement: `${repositoriesSourcePath}/index.ts`,
       },
     ],

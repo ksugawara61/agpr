@@ -1,4 +1,4 @@
-import { addPullRequestReviewThreadReply } from "@ksugawara61/agpr-repositories/github";
+import { addPullRequestReviewThreadReply } from "@agpr/repositories/github";
 
 const REVIEW_REPLY_FOOTER = "🤖 create by agpr";
 

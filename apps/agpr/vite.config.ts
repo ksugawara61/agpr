@@ -9,8 +9,8 @@ const externalModuleNames = [
 
 const isExternalModule = (id: string): boolean =>
   externalModuleNames.includes(id) ||
-  id === "@ksugawara61/agpr-repositories" ||
-  id.startsWith("@ksugawara61/agpr-repositories/");
+  id === "@agpr/repositories" ||
+  id.startsWith("@agpr/repositories/");
 
 export default defineConfig({
   build: {

@@ -22,7 +22,7 @@
   ],
   "license": "MIT",
   "main": "dist/index.js",
-  "name": "@ksugawara61/agpr-repositories",
+  "name": "@agpr/repositories",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit -p tsconfig.json"
