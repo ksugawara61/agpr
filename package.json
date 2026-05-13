@@ -26,5 +26,5 @@
     "test": "vitest run --coverage",
     "typecheck": "turbo run typecheck"
   },
-  "version": "0.0.1"
+  "version": "0.0.2"
 }
