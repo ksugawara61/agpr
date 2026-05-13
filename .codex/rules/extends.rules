@@ -1,0 +1,13 @@
+prefix_rule(
+  pattern=["CI=true", "npx", "@ksugawara61/agpr@latest"],
+  decision="allow",
+  match = [
+    "CI=true npx @ksugawara61/agpr@latest review",
+    "CI=true npx @ksugawara61/agpr@latest review-reply",
+    "CI=true npx @ksugawara61/agpr@latest create-draft-pr"
+  ],
+  not_match = [
+    "npx other",
+    "npx @ksugawara61/agpr@latest review"
+  ]
+)
