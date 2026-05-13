@@ -2,7 +2,7 @@ import {
   createDraftPullRequest as createGitHubDraftPullRequest,
   type GitHubCreatedPullRequest,
   requestCopilotReview,
-} from "../../repositories/github.js";
+} from "@ksugawara61/agpr-repositories/github";
 
 const DEFAULT_BASE_BRANCH = "main";
 

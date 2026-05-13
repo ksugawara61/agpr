@@ -1,10 +1,10 @@
 import { resolve } from "node:path";
+import { readTextFile } from "@ksugawara61/agpr-repositories/file-system";
 import type { Command } from "commander";
 import {
   type UpdatePullRequestInput,
   updatePullRequest,
 } from "../../applications/pull-request/update-pull-request.js";
-import { readTextFile } from "../../repositories/file-system.js";
 
 type UpdatePullRequestCommandOptions = {
   cwd: string;

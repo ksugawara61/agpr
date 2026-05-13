@@ -1,8 +1,27 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
+const repositoriesSourcePath = fileURLToPath(
+  new URL("./packages/repositories/src", import.meta.url),
+);
+
 export default defineConfig({
+  resolve: {
+    alias: [
+      {
+        find: /^@ksugawara61\/agpr-repositories\/(.+)$/,
+        replacement: `${repositoriesSourcePath}/$1.ts`,
+      },
+      {
+        find: "@ksugawara61/agpr-repositories",
+        replacement: `${repositoriesSourcePath}/index.ts`,
+      },
+    ],
+  },
   test: {
     coverage: {
+      exclude: ["**/*.test.ts"],
+      include: ["apps/*/src/**/*.ts", "packages/*/src/**/*.ts"],
       provider: "v8",
       thresholds: {
         branches: 85,
@@ -12,6 +31,6 @@ export default defineConfig({
       },
     },
     environment: "node",
-    include: ["src/**/*.test.ts"],
+    include: ["apps/*/src/**/*.test.ts", "packages/*/src/**/*.test.ts"],
   },
 });

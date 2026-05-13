@@ -4,7 +4,7 @@ import {
   type GitHubReviewThread,
   type GitHubReviewThreadComment,
   listReviewThreads,
-} from "../../repositories/github.js";
+} from "@ksugawara61/agpr-repositories/github";
 
 type StructuredReviewComment = {
   author: string | null;

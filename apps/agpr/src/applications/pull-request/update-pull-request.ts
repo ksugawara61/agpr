@@ -2,7 +2,7 @@ import {
   findPullRequestByBranch,
   type GitHubCreatedPullRequest,
   updatePullRequestDescription,
-} from "../../repositories/github.js";
+} from "@ksugawara61/agpr-repositories/github";
 
 const DEFAULT_PULL_REQUEST_TEMPLATE = [
   "## Background",

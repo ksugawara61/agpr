@@ -1,0 +1,33 @@
+{
+  "dependencies": {
+    "execa": "catalog:"
+  },
+  "description": "Reusable repository adapters for agpr",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./file-system": {
+      "import": "./dist/file-system.js",
+      "types": "./dist/file-system.d.ts"
+    },
+    "./github": {
+      "import": "./dist/github.js",
+      "types": "./dist/github.d.ts"
+    }
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "license": "MIT",
+  "main": "dist/index.js",
+  "name": "@ksugawara61/agpr-repositories",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "version": "0.0.1"
+}

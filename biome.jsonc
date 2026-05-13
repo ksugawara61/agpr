@@ -17,7 +17,7 @@
     "includes": [
       ".claude/settings.json",
       "biome.jsonc",
-      "package.json",
+      "**/package.json",
       "**/*.ts",
       "!.claude/worktrees",
       "!.codex/worktrees",

@@ -1,26 +1,25 @@
 import { Command } from "commander";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../applications/pull-request/create-draft-pull-request.js", () => ({
-  createDraftPullRequest: vi.fn(),
+vi.mock("../../applications/pull-request/update-pull-request.js", () => ({
+  updatePullRequest: vi.fn(),
 }));
 
-vi.mock("../../repositories/file-system.js", () => ({
+vi.mock("@ksugawara61/agpr-repositories/file-system", () => ({
   readTextFile: vi.fn(),
 }));
 
-import { createDraftPullRequest } from "../../applications/pull-request/create-draft-pull-request.js";
-import { readTextFile } from "../../repositories/file-system.js";
-import { registerCreateDraftPullRequestCommand } from "./register-create-draft-pull-request-command.js";
+import { readTextFile } from "@ksugawara61/agpr-repositories/file-system";
+import { updatePullRequest } from "../../applications/pull-request/update-pull-request.js";
+import { registerUpdatePullRequestCommand } from "./register-update-pull-request-command.js";
 
-const mockCreateDraftPullRequest = vi.mocked(createDraftPullRequest);
+const mockUpdatePullRequest = vi.mocked(updatePullRequest);
 const mockReadTextFile = vi.mocked(readTextFile);
 
 const makeInput = (overrides: Record<string, unknown> = {}) => ({
-  background: "レビュー作成を効率化したい",
-  changes: ["draft PR command", "template rendering"],
-  headBranch: "feature/create-draft-pr",
-  title: "Add draft PR command",
+  background: "レビュー説明を更新したい",
+  branchName: "feature/update-pr",
+  changes: ["update PR command", "template rendering"],
   ...overrides,
 });
 
@@ -31,7 +30,7 @@ const createProgram = (): Command => {
     writeErr: () => undefined,
     writeOut: () => undefined,
   });
-  registerCreateDraftPullRequestCommand(program);
+  registerUpdatePullRequestCommand(program);
   return program;
 };
 
@@ -43,17 +42,17 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("registerCreateDraftPullRequestCommand", () => {
-  it("creates a draft PR from JSON input", async () => {
+describe("registerUpdatePullRequestCommand", () => {
+  it("updates a PR from JSON input", async () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
-    mockCreateDraftPullRequest.mockResolvedValueOnce({
+    mockUpdatePullRequest.mockResolvedValueOnce({
       pullRequestNumber: 42,
       pullRequestUrl: "https://github.com/o/r/pull/42",
     });
 
     await createProgram().parseAsync(
       [
-        "create-draft-pr",
+        "update-pr",
         "--repo",
         "o/r",
         "--input",
@@ -64,16 +63,13 @@ describe("registerCreateDraftPullRequestCommand", () => {
       { from: "user" },
     );
 
-    expect(mockCreateDraftPullRequest).toHaveBeenCalledWith({
-      copilot: false,
+    expect(mockUpdatePullRequest).toHaveBeenCalledWith({
       cwd: "/repo",
       input: {
-        background: "レビュー作成を効率化したい",
-        baseBranch: "main",
-        changes: ["draft PR command", "template rendering"],
-        headBranch: "feature/create-draft-pr",
+        background: "レビュー説明を更新したい",
+        branchName: "feature/update-pr",
+        changes: ["update PR command", "template rendering"],
         issueId: undefined,
-        title: "Add draft PR command",
       },
       owner: "o",
       repo: "r",
@@ -88,18 +84,18 @@ describe("registerCreateDraftPullRequestCommand", () => {
   it("reads a markdown template file relative to cwd", async () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
     mockReadTextFile.mockResolvedValueOnce("## Custom\n\n{{changes}}");
-    mockCreateDraftPullRequest.mockResolvedValueOnce({
+    mockUpdatePullRequest.mockResolvedValueOnce({
       pullRequestNumber: 7,
       pullRequestUrl: "https://github.com/o/r/pull/7",
     });
 
     await createProgram().parseAsync(
       [
-        "create-draft-pr",
+        "update-pr",
         "--repo",
         "o/r",
         "--input",
-        JSON.stringify(makeInput({ baseBranch: "develop", issueId: "XFE-1" })),
+        JSON.stringify(makeInput({ issueId: "XFE-1" })),
         "--template",
         ".github/pull_request_template.md",
         "--cwd",
@@ -111,40 +107,12 @@ describe("registerCreateDraftPullRequestCommand", () => {
     expect(mockReadTextFile).toHaveBeenCalledWith(
       "/repo/.github/pull_request_template.md",
     );
-    expect(mockCreateDraftPullRequest).toHaveBeenCalledWith(
+    expect(mockUpdatePullRequest).toHaveBeenCalledWith(
       expect.objectContaining({
         input: expect.objectContaining({
-          baseBranch: "develop",
           issueId: "XFE-1",
         }),
         template: "## Custom\n\n{{changes}}",
-      }),
-    );
-    expect(logSpy).toHaveBeenCalledOnce();
-  });
-
-  it("passes copilot option to the application", async () => {
-    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
-    mockCreateDraftPullRequest.mockResolvedValueOnce({
-      pullRequestNumber: 42,
-      pullRequestUrl: "https://github.com/o/r/pull/42",
-    });
-
-    await createProgram().parseAsync(
-      [
-        "create-draft-pr",
-        "--repo",
-        "o/r",
-        "--input",
-        JSON.stringify(makeInput()),
-        "--copilot",
-      ],
-      { from: "user" },
-    );
-
-    expect(mockCreateDraftPullRequest).toHaveBeenCalledWith(
-      expect.objectContaining({
-        copilot: true,
       }),
     );
     expect(logSpy).toHaveBeenCalledOnce();
@@ -162,9 +130,9 @@ describe("registerCreateDraftPullRequestCommand", () => {
       name: "rejects invalid changes",
     },
     {
-      expected: "headBranch must be a string",
-      input: JSON.stringify(makeInput({ headBranch: undefined })),
-      name: "rejects missing headBranch",
+      expected: "branchName must be a string",
+      input: JSON.stringify(makeInput({ branchName: undefined })),
+      name: "rejects missing branchName",
     },
     {
       expected: "--repo must be in owner/repo format: invalid",
@@ -175,8 +143,10 @@ describe("registerCreateDraftPullRequestCommand", () => {
   ])("$name", async ({ input, expected, repo = "o/r" }) => {
     await expect(
       createProgram().parseAsync(
-        ["create-draft-pr", "--repo", repo, "--input", input],
-        { from: "user" },
+        ["update-pr", "--repo", repo, "--input", input],
+        {
+          from: "user",
+        },
       ),
     ).rejects.toThrow(expected);
   });

@@ -29,7 +29,7 @@ pnpm build
 Run the built CLI locally:
 
 ```sh
-node dist/cli.js --help
+node apps/agpr/dist/cli.js --help
 ```
 
 If installed as a package, the binary name is:
@@ -45,7 +45,7 @@ agpr --help
 Fetch structured pull request review comments for an open PR by head branch.
 
 ```sh
-node dist/cli.js review \
+node apps/agpr/dist/cli.js review \
   --branch feature/example \
   --repo owner/repo \
   --format text
@@ -65,7 +65,7 @@ Options:
 Reply to one or more GitHub PR review threads.
 
 ```sh
-node dist/cli.js review-reply \
+node apps/agpr/dist/cli.js review-reply \
   --input '{"replies":[{"threadId":"PRRT_xxx","commitHashs":["abc123"],"message":"Fixed in this commit."}]}' \
   --format text
 ```
@@ -87,7 +87,7 @@ Options:
 Create a draft pull request with a generated description.
 
 ```sh
-node dist/cli.js create-draft-pr \
+node apps/agpr/dist/cli.js create-draft-pr \
   --repo owner/repo \
   --input '{"title":"Add feature","background":"Explain why this change is needed.","issueId":"#123","changes":["Add command","Add tests"],"headBranch":"feature/example","baseBranch":"main"}' \
   --template .github/pull_request_template.md
@@ -116,7 +116,7 @@ Update an existing open pull request description by finding the PR from its head
 branch.
 
 ```sh
-node dist/cli.js update-pr \
+node apps/agpr/dist/cli.js update-pr \
   --repo owner/repo \
   --input '{"branchName":"feature/example","background":"Updated context.","issueId":"#123","changes":["Refine implementation","Update tests"]}' \
   --template .github/pull_request_template.md
@@ -168,6 +168,11 @@ Supported placeholders:
 Unknown placeholders are left unchanged.
 
 ## Development
+
+Project layout:
+
+- `apps/agpr`: CLI application package.
+- `packages/repositories`: reusable repository adapters used by the CLI.
 
 ```sh
 pnpm test

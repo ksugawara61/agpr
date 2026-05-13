@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("../../repositories/github.js", () => ({
+vi.mock("@ksugawara61/agpr-repositories/github", () => ({
   findPullRequestByBranch: vi.fn(),
   listReviewThreads: vi.fn(),
 }));
@@ -10,7 +10,7 @@ import {
   type GitHubPullRequest,
   type GitHubReviewThread,
   listReviewThreads,
-} from "../../repositories/github.js";
+} from "@ksugawara61/agpr-repositories/github";
 import { getStructuredReviewCommentsByBranch } from "./get-structured-review-comments-by-branch.js";
 
 const mockFindPullRequestByBranch = vi.mocked(findPullRequestByBranch);

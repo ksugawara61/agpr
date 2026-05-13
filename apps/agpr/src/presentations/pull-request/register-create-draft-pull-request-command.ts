@@ -1,10 +1,10 @@
 import { resolve } from "node:path";
+import { readTextFile } from "@ksugawara61/agpr-repositories/file-system";
 import type { Command } from "commander";
 import {
   type CreateDraftPullRequestInput,
   createDraftPullRequest,
 } from "../../applications/pull-request/create-draft-pull-request.js";
-import { readTextFile } from "../../repositories/file-system.js";
 
 type CreateDraftPullRequestCommandOptions = {
   copilot: boolean;

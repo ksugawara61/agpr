@@ -1,5 +1,20 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "project": ["src/**/*.ts"],
-  "ignoreBinaries": ["gh", "diff-coverage"]
+  "ignoreBinaries": ["gh", "diff-coverage"],
+  "workspaces": {
+    "apps/agpr": {
+      "paths": {
+        "@ksugawara61/agpr-repositories": [
+          "../../packages/repositories/src/index.ts"
+        ],
+        "@ksugawara61/agpr-repositories/*": [
+          "../../packages/repositories/src/*.ts"
+        ]
+      },
+      "project": ["src/**/*.ts"]
+    },
+    "packages/repositories": {
+      "project": ["src/**/*.ts"]
+    }
+  }
 }

@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "paths": {
+      "@ksugawara61/agpr-repositories": [
+        "../../packages/repositories/src/index.ts"
+      ],
+      "@ksugawara61/agpr-repositories/*": [
+        "../../packages/repositories/src/*.ts"
+      ]
+    }
+  },
+  "exclude": ["node_modules", "dist", "src/**/*.test.ts"],
+  "include": ["src/**/*.ts"]
+}

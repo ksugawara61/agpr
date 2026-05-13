@@ -1,13 +1,5 @@
 {
-  "author": "ksugawara61",
-  "bin": {
-    "agpr": "dist/cli.js"
-  },
-  "dependencies": {
-    "commander": "catalog:",
-    "execa": "catalog:"
-  },
-  "description": "command line tool to optimize Github pull request review process",
+  "description": "workspace for the agpr CLI and reusable packages",
   "devDependencies": {
     "@biomejs/biome": "catalog:",
     "@types/node": "catalog:",
@@ -19,18 +11,13 @@
     "vite": "catalog:",
     "vitest": "catalog:"
   },
-  "files": [
-    "dist/**/*",
-    "README.md",
-    "!src/**/*"
-  ],
-  "keywords": [],
   "license": "MIT",
-  "main": "dist/cli.js",
-  "name": "@ksugawara61/agpr",
+  "name": "agpr-workspace",
   "packageManager": "pnpm@11.1.0+sha512.0c44e842e5686b2c061a81adda8b2258bd8818e9704b2cf2c63d56b931a7b2e910092e085027003b96ca3911ab56a07f6df5abaed2be9925034cdd686a535b14",
+  "private": true,
   "scripts": {
-    "build": "vite build",
+    "build": "pnpm --dir packages/repositories build && pnpm --dir apps/agpr build",
+    "coverage": "pnpm test",
     "fmt": "biome check --write .",
     "knip": "knip",
     "lint": "biome lint .",
@@ -38,6 +25,5 @@
     "test": "vitest run --coverage",
     "typecheck": "tsc --noEmit"
   },
-  "type": "module",
   "version": "0.0.1"
 }

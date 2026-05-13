@@ -1,12 +1,16 @@
 import { builtinModules } from "node:module";
 import { defineConfig } from "vite";
 
-const externalModules = [
+const externalModuleNames = [
   ...builtinModules,
   ...builtinModules.map((moduleName) => `node:${moduleName}`),
   "commander",
-  "execa",
 ];
+
+const isExternalModule = (id: string): boolean =>
+  externalModuleNames.includes(id) ||
+  id === "@ksugawara61/agpr-repositories" ||
+  id.startsWith("@ksugawara61/agpr-repositories/");
 
 export default defineConfig({
   build: {
@@ -18,7 +22,7 @@ export default defineConfig({
     },
     minify: "esbuild",
     rollupOptions: {
-      external: externalModules,
+      external: isExternalModule,
       output: {
         banner: "#!/usr/bin/env node",
       },
