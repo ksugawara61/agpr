@@ -74,7 +74,7 @@ cd "${worktree_dir}"
 pnpm install
 
 codex_status=0
-codex "$@" || codex_status=$?
+codex --sandbox workspace-write --add-dir "${worktree_dir}" "$@" || codex_status=$?
 
 remove_status=0
 "${repo_root}/scripts/worktrees/remove-codex.sh" || remove_status=$?
