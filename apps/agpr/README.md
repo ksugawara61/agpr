@@ -81,7 +81,8 @@ agpr review-reply \
 
 ### `create-draft-pr` — Create a draft pull request
 
-Create a draft pull request with a generated description.
+Create a draft pull request with a generated description. Add `--open` to
+create a pull request that is ready for review instead of draft.
 
 ```sh
 agpr create-draft-pr \
@@ -107,6 +108,7 @@ agpr create-draft-pr \
 | `--input <json>` | JSON payload for the PR (required) |
 | `--template <path>` | Optional Markdown template file |
 | `--copilot` | Request a GitHub Copilot review after creating the PR |
+| `--open` | Create a pull request ready for review instead of draft |
 | `--cwd <path>` | Working directory |
 
 ### `update-pr` — Update a pull request description

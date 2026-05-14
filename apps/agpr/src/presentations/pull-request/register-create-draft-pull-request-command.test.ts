@@ -67,6 +67,7 @@ describe("registerCreateDraftPullRequestCommand", () => {
     expect(mockCreateDraftPullRequest).toHaveBeenCalledWith({
       copilot: false,
       cwd: "/repo",
+      draft: true,
       input: {
         background: "レビュー作成を効率化したい",
         baseBranch: "main",
@@ -118,6 +119,33 @@ describe("registerCreateDraftPullRequestCommand", () => {
           issueId: "XFE-1",
         }),
         template: "## Custom\n\n{{changes}}",
+      }),
+    );
+    expect(logSpy).toHaveBeenCalledOnce();
+  });
+
+  it("passes open option to create a ready pull request", async () => {
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    mockCreateDraftPullRequest.mockResolvedValueOnce({
+      pullRequestNumber: 42,
+      pullRequestUrl: "https://github.com/o/r/pull/42",
+    });
+
+    await createProgram().parseAsync(
+      [
+        "create-draft-pr",
+        "--repo",
+        "o/r",
+        "--input",
+        JSON.stringify(makeInput()),
+        "--open",
+      ],
+      { from: "user" },
+    );
+
+    expect(mockCreateDraftPullRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        draft: false,
       }),
     );
     expect(logSpy).toHaveBeenCalledOnce();

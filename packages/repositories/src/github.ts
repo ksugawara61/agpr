@@ -79,6 +79,7 @@ type CreateDraftPullRequestParams = {
   baseBranch: string;
   body: string;
   cwd: string;
+  draft?: boolean;
   headBranch: string;
   owner: string;
   repo: string;
@@ -339,7 +340,7 @@ export const createDraftPullRequest = async (
   const payload = {
     base: params.baseBranch,
     body: params.body,
-    draft: true,
+    draft: params.draft ?? true,
     head: params.headBranch,
     title: params.title,
   };
