@@ -17,6 +17,19 @@ fail_invalid_tool() {
   exit 1
 }
 
+update_main_branch() {
+  local current_branch
+  current_branch="$(git -C "${repo_root}" rev-parse --abbrev-ref HEAD)" || return $?
+
+  if [[ "${current_branch}" != "main" ]]; then
+    echo "Skipping main update because project root is on ${current_branch}."
+    return 0
+  fi
+
+  echo "Updating main branch in project root..."
+  git -C "${repo_root}" pull --ff-only
+}
+
 if [[ $# -eq 0 ]]; then
   usage >&2
   exit 1
@@ -108,8 +121,17 @@ esac
 remove_status=0
 "${repo_root}/scripts/worktrees/remove.sh" "${tool}" || remove_status=$?
 
+main_update_status=0
+if [[ "${remove_status}" -eq 0 ]]; then
+  update_main_branch || main_update_status=$?
+fi
+
 if [[ "${tool_status}" -ne 0 ]]; then
   exit "${tool_status}"
+fi
+
+if [[ "${main_update_status}" -ne 0 ]]; then
+  exit "${main_update_status}"
 fi
 
 exit "${remove_status}"
