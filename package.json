@@ -23,6 +23,7 @@
     "knip": "knip",
     "lint": "biome lint .",
     "prepare": "bash scripts/install-lefthook.sh",
+    "sync:claude-rules": "node --experimental-strip-types scripts/cd/sync-claude-rules.ts",
     "test": "vitest run --coverage",
     "typecheck": "turbo run typecheck",
     "verup": "node --experimental-strip-types scripts/cd/verup.ts"
