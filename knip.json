@@ -2,6 +2,14 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "ignoreBinaries": ["gh", "diff-coverage"],
   "workspaces": {
+    ".": {
+      "entry": [
+        "scripts/worktrees/create.ts",
+        "scripts/worktrees/remove.ts",
+        "scripts/worktrees/worktrees.test.ts"
+      ],
+      "project": ["scripts/**/*.ts"]
+    },
     "apps/agpr": {
       "ignoreDependencies": ["execa"],
       "paths": {
