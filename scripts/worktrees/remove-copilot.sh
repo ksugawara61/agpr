@@ -3,10 +3,10 @@ set -euo pipefail
 
 usage() {
   cat <<'USAGE'
-Usage: scripts/worktrees/remove-codex.sh
+Usage: scripts/worktrees/remove-copilot.sh
 
 Removes the current linked worktree when it lives under
-.worktrees/codex/<name>, then moves back to the project root.
+.worktrees/copilot/<name>, then moves back to the project root.
 USAGE
 }
 
@@ -35,14 +35,14 @@ if [[ "$(basename "${git_common_dir}")" != ".git" ]]; then
 fi
 
 project_root="$(cd "${git_common_dir}/.." && pwd -P)"
-codex_worktrees_dir="${project_root}/.worktrees/codex"
+copilot_worktrees_dir="${project_root}/.worktrees/copilot"
 worktree_root="$(cd "${worktree_root}" && pwd -P)"
 
 case "${worktree_root}" in
-  "${codex_worktrees_dir}"/*)
+  "${copilot_worktrees_dir}"/*)
     ;;
   *)
-    echo "Current linked worktree is not under: ${codex_worktrees_dir}" >&2
+    echo "Current linked worktree is not under: ${copilot_worktrees_dir}" >&2
     echo "Current worktree: ${worktree_root}" >&2
     exit 1
     ;;

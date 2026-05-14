@@ -3,11 +3,11 @@ set -euo pipefail
 
 usage() {
   cat <<'USAGE'
-Usage: scripts/worktrees/codex <name> [codex-args...]
+Usage: scripts/worktrees/create-copilot.sh <name> [copilot-args...]
 
-Creates a git worktree at .worktrees/codex/<name>, copies paths
-listed in .worktreeinclude, installs dependencies, starts codex, and removes
-the worktree after codex exits.
+Creates a git worktree at .worktrees/copilot/<name>, copies paths
+listed in .worktreeinclude, installs dependencies, starts copilot, and removes
+the worktree after copilot exits.
 USAGE
 }
 
@@ -27,8 +27,8 @@ worktree_name="${1}"
 shift
 
 repo_root="$(git rev-parse --show-toplevel)"
-branch_name="codex/${worktree_name}"
-worktree_dir="${repo_root}/.worktrees/codex/${worktree_name}"
+branch_name="copilot/${worktree_name}"
+worktree_dir="${repo_root}/.worktrees/copilot/${worktree_name}"
 include_file="${repo_root}/.worktreeinclude"
 
 git check-ref-format --branch "${branch_name}" >/dev/null
@@ -73,14 +73,14 @@ fi
 cd "${worktree_dir}"
 pnpm install
 
-codex_status=0
-codex --sandbox workspace-write --add-dir "${worktree_dir}" "$@" || codex_status=$?
+copilot_status=0
+copilot --add-dir "${worktree_dir}" "$@" || copilot_status=$?
 
 remove_status=0
-"${repo_root}/scripts/worktrees/remove-codex.sh" || remove_status=$?
+"${repo_root}/scripts/worktrees/remove-copilot.sh" || remove_status=$?
 
-if [[ "${codex_status}" -ne 0 ]]; then
-  exit "${codex_status}"
+if [[ "${copilot_status}" -ne 0 ]]; then
+  exit "${copilot_status}"
 fi
 
 exit "${remove_status}"
