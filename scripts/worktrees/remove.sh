@@ -3,17 +3,43 @@ set -euo pipefail
 
 usage() {
   cat <<'USAGE'
-Usage: scripts/worktrees/remove-copilot.sh
+Usage: scripts/worktrees/remove.sh <codex|copilot>
 
 Removes the current linked worktree when it lives under
-.worktrees/copilot/<name>, then moves back to the project root.
+.worktrees/<tool>/<name>, then moves back to the project root.
 USAGE
 }
 
-case "${1:-}" in
+fail_invalid_tool() {
+  echo "Unsupported tool: ${1}" >&2
+  echo "Expected one of: codex, copilot" >&2
+  exit 1
+}
+
+if [[ $# -eq 0 ]]; then
+  usage >&2
+  exit 1
+fi
+
+case "${1}" in
   -h|--help)
     usage
     exit 0
+    ;;
+esac
+
+if [[ $# -ne 1 ]]; then
+  usage >&2
+  exit 1
+fi
+
+tool="${1}"
+
+case "${tool}" in
+  codex|copilot)
+    ;;
+  *)
+    fail_invalid_tool "${tool}"
     ;;
 esac
 
@@ -29,24 +55,25 @@ if [[ "${git_dir}" == "${git_common_dir}" ]]; then
   exit 1
 fi
 
-if [[ "$(basename "${git_common_dir}")" != ".git" ]]; then
-  echo "Cannot infer project root from git common dir: ${git_common_dir}" >&2
-  exit 1
-fi
-
-project_root="$(cd "${git_common_dir}/.." && pwd -P)"
-copilot_worktrees_dir="${project_root}/.worktrees/copilot"
 worktree_root="$(cd "${worktree_root}" && pwd -P)"
+worktrees_marker="/.worktrees/${tool}/"
 
 case "${worktree_root}" in
-  "${copilot_worktrees_dir}"/*)
+  *"${worktrees_marker}"*)
     ;;
   *)
-    echo "Current linked worktree is not under: ${copilot_worktrees_dir}" >&2
+    echo "Current linked worktree is not under a .worktrees/${tool} directory." >&2
     echo "Current worktree: ${worktree_root}" >&2
     exit 1
     ;;
 esac
+
+project_root="${worktree_root%%"${worktrees_marker}"*}"
+
+if [[ -z "${project_root}" || ! -d "${project_root}" ]]; then
+  echo "Cannot infer project root from worktree path: ${worktree_root}" >&2
+  exit 1
+fi
 
 cd "${worktree_root}"
 git worktree remove .

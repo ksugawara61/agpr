@@ -3,15 +3,21 @@ set -euo pipefail
 
 usage() {
   cat <<'USAGE'
-Usage: scripts/worktrees/create-copilot.sh <name> [copilot-args...]
+Usage: scripts/worktrees/create.sh <codex|copilot> <name> [tool-args...]
 
-Creates a git worktree at .worktrees/copilot/<name>, copies paths
-listed in .worktreeinclude, installs dependencies, starts copilot, and removes
-the worktree after copilot exits.
+Creates a git worktree at .worktrees/<tool>/<name>, copies paths
+listed in .worktreeinclude, installs dependencies, starts the selected tool,
+and removes the worktree after the tool exits.
 USAGE
 }
 
-if [[ $# -lt 1 ]]; then
+fail_invalid_tool() {
+  echo "Unsupported tool: ${1}" >&2
+  echo "Expected one of: codex, copilot" >&2
+  exit 1
+}
+
+if [[ $# -eq 0 ]]; then
   usage >&2
   exit 1
 fi
@@ -23,12 +29,28 @@ case "${1}" in
     ;;
 esac
 
+if [[ $# -lt 2 ]]; then
+  usage >&2
+  exit 1
+fi
+
+tool="${1}"
+shift
+
+case "${tool}" in
+  codex|copilot)
+    ;;
+  *)
+    fail_invalid_tool "${tool}"
+    ;;
+esac
+
 worktree_name="${1}"
 shift
 
 repo_root="$(git rev-parse --show-toplevel)"
-branch_name="copilot/${worktree_name}"
-worktree_dir="${repo_root}/.worktrees/copilot/${worktree_name}"
+branch_name="${tool}/${worktree_name}"
+worktree_dir="${repo_root}/.worktrees/${tool}/${worktree_name}"
 include_file="${repo_root}/.worktreeinclude"
 
 git check-ref-format --branch "${branch_name}" >/dev/null
@@ -73,14 +95,21 @@ fi
 cd "${worktree_dir}"
 pnpm install
 
-copilot_status=0
-copilot --add-dir "${worktree_dir}" "$@" || copilot_status=$?
+tool_status=0
+case "${tool}" in
+  codex)
+    codex --sandbox workspace-write --add-dir "${worktree_dir}" "$@" || tool_status=$?
+    ;;
+  copilot)
+    copilot --add-dir "${worktree_dir}" "$@" || tool_status=$?
+    ;;
+esac
 
 remove_status=0
-"${repo_root}/scripts/worktrees/remove-copilot.sh" || remove_status=$?
+"${repo_root}/scripts/worktrees/remove.sh" "${tool}" || remove_status=$?
 
-if [[ "${copilot_status}" -ne 0 ]]; then
-  exit "${copilot_status}"
+if [[ "${tool_status}" -ne 0 ]]; then
+  exit "${tool_status}"
 fi
 
 exit "${remove_status}"
