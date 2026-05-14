@@ -9,6 +9,7 @@ descriptions.
 
 - Node.js
 - pnpm
+- Go
 - GitHub CLI (`gh`)
 - An authenticated GitHub CLI session
 
@@ -174,6 +175,13 @@ Project layout:
 - `apps/agpr`: CLI application package.
 - `packages/repositories`: reusable repository adapters used by the CLI.
 
+Worktree helper:
+
+```sh
+go run ./scripts/worktrees create codex feature-name
+go run ./scripts/worktrees remove codex
+```
+
 ```sh
 pnpm test
 pnpm typecheck
@@ -181,6 +189,7 @@ pnpm lint
 pnpm build
 pnpm coverage
 pnpm knip
+go test ./...
 ```
 
 ## License
