@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "strict": true
+  },
+  "tasks": {
+    "create": "deno run --allow-run --allow-read --allow-write create.ts",
+    "remove": "deno run --allow-run --allow-read --allow-write remove.ts",
+    "test": "deno test --allow-run --allow-read --allow-write *.test.ts"
+  }
+}
