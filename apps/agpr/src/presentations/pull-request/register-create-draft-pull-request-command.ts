@@ -10,6 +10,7 @@ type CreateDraftPullRequestCommandOptions = {
   copilot: boolean;
   cwd: string;
   input: string;
+  open: boolean;
   repo: string;
   template?: string;
 };
@@ -100,6 +101,7 @@ export const registerCreateDraftPullRequestCommand = (
     )
     .requiredOption("-R, --repo <owner/repo>", "GitHub repository")
     .option("--copilot", "Request a GitHub Copilot review", false)
+    .option("--open", "Create a pull request ready for review", false)
     .option("--template <path>", "Markdown template file")
     .option("--cwd <path>", "Working directory", process.cwd())
     .action(async (options: CreateDraftPullRequestCommandOptions) => {
@@ -111,6 +113,7 @@ export const registerCreateDraftPullRequestCommand = (
       const result = await createDraftPullRequest({
         copilot: options.copilot,
         cwd: options.cwd,
+        draft: !options.open,
         input,
         owner,
         repo,

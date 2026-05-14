@@ -71,6 +71,7 @@ export const renderPullRequestTemplate = (
 export const createDraftPullRequest = async (args: {
   copilot?: boolean;
   cwd: string;
+  draft?: boolean;
   input: CreateDraftPullRequestInput;
   owner: string;
   repo: string;
@@ -88,6 +89,7 @@ export const createDraftPullRequest = async (args: {
     baseBranch,
     body,
     cwd: args.cwd,
+    draft: args.draft ?? true,
     headBranch: args.input.headBranch,
     owner: args.owner,
     repo: args.repo,

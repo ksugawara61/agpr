@@ -84,7 +84,8 @@ Options:
 
 ### Create a draft pull request
 
-Create a draft pull request with a generated description.
+Create a draft pull request with a generated description. Add `--open` to
+create a pull request that is ready for review instead of draft.
 
 ```sh
 node apps/agpr/dist/cli.js create-draft-pr \
@@ -108,6 +109,7 @@ Options:
 - `--input <json>`: JSON payload for the PR.
 - `--template <path>`: Optional Markdown template file.
 - `--copilot`: Request a GitHub Copilot review after creating the PR.
+- `--open`: Create a pull request ready for review instead of draft.
 - `--cwd <path>`: Working directory.
 
 ### Update a pull request description

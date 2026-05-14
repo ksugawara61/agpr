@@ -345,6 +345,29 @@ describe("createDraftPullRequest", () => {
       title: "Add draft PR command",
     });
   });
+
+  it("sends draft false when creating a ready pull request", async () => {
+    stubOk(
+      JSON.stringify({ number: 42, url: "https://github.com/o/r/pull/42" }),
+    );
+
+    await createDraftPullRequest({
+      baseBranch: "main",
+      body: "## Background\n\nwhy",
+      cwd: "/repo",
+      draft: false,
+      headBranch: "feature/create-draft-pr",
+      owner: "o",
+      repo: "r",
+      title: "Add draft PR command",
+    });
+
+    const call = mockExeca.mock.calls[0];
+    const opts = call[2] as unknown as { input?: string };
+    expect(JSON.parse(opts.input ?? "{}")).toMatchObject({
+      draft: false,
+    });
+  });
 });
 
 describe("requestCopilotReview", () => {

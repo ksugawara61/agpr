@@ -105,6 +105,7 @@ describe("createDraftPullRequest", () => {
         "- template rendering",
       ].join("\n"),
       cwd: "/repo",
+      draft: true,
       headBranch: "feature/create-draft-pr",
       owner: "o",
       repo: "r",
@@ -134,6 +135,27 @@ describe("createDraftPullRequest", () => {
       expect.objectContaining({
         baseBranch: "develop",
         body: "Issue: #123\n- draft PR command\n- template rendering",
+      }),
+    );
+  });
+
+  it("creates a ready pull request when draft is false", async () => {
+    mockCreateGitHubDraftPullRequest.mockResolvedValueOnce({
+      number: 42,
+      url: "https://github.com/o/r/pull/42",
+    });
+
+    await createDraftPullRequest({
+      cwd: "/repo",
+      draft: false,
+      input: makeInput(),
+      owner: "o",
+      repo: "r",
+    });
+
+    expect(mockCreateGitHubDraftPullRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        draft: false,
       }),
     );
   });
