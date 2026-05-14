@@ -6,7 +6,7 @@ usage() {
 Usage: scripts/worktrees/remove-codex.sh
 
 Removes the current linked worktree when it lives under
-.codex/worktrees/codex/<name>, then moves back to the project root.
+.worktrees/codex/<name>, then moves back to the project root.
 USAGE
 }
 
@@ -35,7 +35,7 @@ if [[ "$(basename "${git_common_dir}")" != ".git" ]]; then
 fi
 
 project_root="$(cd "${git_common_dir}/.." && pwd -P)"
-codex_worktrees_dir="${project_root}/.codex/worktrees/codex"
+codex_worktrees_dir="${project_root}/.worktrees/codex"
 worktree_root="$(cd "${worktree_root}" && pwd -P)"
 
 case "${worktree_root}" in

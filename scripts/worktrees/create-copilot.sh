@@ -5,7 +5,7 @@ usage() {
   cat <<'USAGE'
 Usage: scripts/worktrees/create-copilot.sh <name> [copilot-args...]
 
-Creates a git worktree at .codex/worktrees/copilot/<name>, copies paths
+Creates a git worktree at .worktrees/copilot/<name>, copies paths
 listed in .worktreeinclude, installs dependencies, starts copilot, and removes
 the worktree after copilot exits.
 USAGE
@@ -28,7 +28,7 @@ shift
 
 repo_root="$(git rev-parse --show-toplevel)"
 branch_name="copilot/${worktree_name}"
-worktree_dir="${repo_root}/.codex/worktrees/copilot/${worktree_name}"
+worktree_dir="${repo_root}/.worktrees/copilot/${worktree_name}"
 include_file="${repo_root}/.worktreeinclude"
 
 git check-ref-format --branch "${branch_name}" >/dev/null

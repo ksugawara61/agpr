@@ -5,7 +5,7 @@ usage() {
   cat <<'USAGE'
 Usage: scripts/worktrees/codex <name> [codex-args...]
 
-Creates a git worktree at .codex/worktrees/codex/<name>, copies paths
+Creates a git worktree at .worktrees/codex/<name>, copies paths
 listed in .worktreeinclude, installs dependencies, starts codex, and removes
 the worktree after codex exits.
 USAGE
@@ -28,7 +28,7 @@ shift
 
 repo_root="$(git rev-parse --show-toplevel)"
 branch_name="codex/${worktree_name}"
-worktree_dir="${repo_root}/.codex/worktrees/codex/${worktree_name}"
+worktree_dir="${repo_root}/.worktrees/codex/${worktree_name}"
 include_file="${repo_root}/.worktreeinclude"
 
 git check-ref-format --branch "${branch_name}" >/dev/null

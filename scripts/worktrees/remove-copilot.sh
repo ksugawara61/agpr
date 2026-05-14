@@ -6,7 +6,7 @@ usage() {
 Usage: scripts/worktrees/remove-copilot.sh
 
 Removes the current linked worktree when it lives under
-.codex/worktrees/copilot/<name>, then moves back to the project root.
+.worktrees/copilot/<name>, then moves back to the project root.
 USAGE
 }
 
@@ -35,7 +35,7 @@ if [[ "$(basename "${git_common_dir}")" != ".git" ]]; then
 fi
 
 project_root="$(cd "${git_common_dir}/.." && pwd -P)"
-copilot_worktrees_dir="${project_root}/.codex/worktrees/copilot"
+copilot_worktrees_dir="${project_root}/.worktrees/copilot"
 worktree_root="$(cd "${worktree_root}" && pwd -P)"
 
 case "${worktree_root}" in
