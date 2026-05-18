@@ -17,7 +17,7 @@ catalog:
   lefthook: 2.1.6
   turbo: 2.9.12
   typescript: 6.0.3
-  vite: 8.0.11
+  vite: 8.0.13
   vitest: 4.1.5
 
 minimumReleaseAge: 4320
