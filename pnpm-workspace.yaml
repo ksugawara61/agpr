@@ -9,7 +9,7 @@ allowBuilds:
 catalog:
   "@biomejs/biome": 2.4.15
   "@types/node": 25.6.2
-  "@vitest/coverage-v8": 4.1.5
+  "@vitest/coverage-v8": 4.1.6
   commander: 14.0.3
   esbuild: 0.28.0
   execa: 9.6.1
